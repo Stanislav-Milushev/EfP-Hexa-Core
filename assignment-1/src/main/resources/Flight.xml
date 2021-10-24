@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendposition" value="762,-60"/>
+		<graphics key="legendautolayout" value="false"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<and abstract="true" mandatory="true" name="Inlandsflug">
+			<and abstract="true" mandatory="true" name="Hinflug">
+				<alt abstract="true" mandatory="true" name="Klasse - Hinflug">
+					<graphics key="collapsed" value="false"/>
+					<feature name="Hinflug - Economy Class"/>
+					<feature name="Hinflug - First Class"/>
+				</alt>
+				<alt abstract="true" mandatory="true" name="Hinflug - Start">
+					<feature name="Hinflug - Start - Köln/Bonn"/>
+					<feature name="Hinflug - Start - Düsseldorf"/>
+					<feature name="Hinflug - Start - München"/>
+					<feature name="Hinflug - Start - Frankfurt a. M."/>
+				</alt>
+				<alt abstract="true" mandatory="true" name="Hinflug - Ziel">
+					<feature name="Hinflug - Ziel - Köln/Bonn"/>
+					<feature name="Hinflug - Ziel - Düsseldorf"/>
+					<feature name="Hinflug - Ziel - München"/>
+					<feature name="Hinflug - Ziel - Frankfurt a. M."/>
+				</alt>
+			</and>
+			<alt abstract="true" mandatory="true" name="Bezahlungsform">
+				<feature name="PayPal"/>
+				<feature name="Kreditkarte"/>
+				<feature name="Bargeld"/>
+			</alt>
+			<and abstract="true" name="Rückflug">
+				<alt abstract="true" mandatory="true" name="Klasse - Rückflug">
+					<feature name="Rückflug - Economy Class"/>
+					<feature name="Rückflug - First Class"/>
+				</alt>
+				<alt abstract="true" mandatory="true" name="Rückflug - Start">
+					<feature name="Rückflug - Start - Köln/Bonn"/>
+					<feature name="Rückflug - Start - Düsseldorf"/>
+					<feature name="Rückflug - Start - München"/>
+					<feature name="Rückflug - Start - Frankfurt a. M."/>
+				</alt>
+				<alt abstract="true" mandatory="true" name="Rückflug - Ziel">
+					<feature name="Rückflug - Ziel - Köln/Bonn"/>
+					<feature name="Rückflug - Ziel - Düsseldorf"/>
+					<feature name="Rückflug - Ziel - München"/>
+					<feature name="Rückflug - Ziel - Frankfurt a. M. "/>
+				</alt>
+			</and>
+		</and>
+	</struct>
+	<constraints>
+		<rule>
+			<imp>
+				<var>Hinflug - Start - Köln/Bonn</var>
+				<not>
+					<var>Hinflug - Ziel - Köln/Bonn</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Hinflug - Start - Düsseldorf</var>
+				<not>
+					<var>Hinflug - Ziel - Düsseldorf</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Hinflug - Start - München</var>
+				<not>
+					<var>Hinflug - Ziel - München</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Hinflug - Start - Frankfurt a. M.</var>
+				<not>
+					<var>Hinflug - Ziel - Frankfurt a. M.</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Rückflug - Start - Köln/Bonn</var>
+				<not>
+					<var>Rückflug - Ziel - Köln/Bonn</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Rückflug - Start - Düsseldorf</var>
+				<not>
+					<var>Rückflug - Ziel - Düsseldorf</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Rückflug - Start - München</var>
+				<not>
+					<var>Rückflug - Ziel - München</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Rückflug - Start - Frankfurt a. M.</var>
+				<not>
+					<var>Rückflug - Ziel - Frankfurt a. M. </var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Rückflug</var>
+				<var>Hinflug</var>
+			</imp>
+		</rule>
+	</constraints>
+</featureModel>
