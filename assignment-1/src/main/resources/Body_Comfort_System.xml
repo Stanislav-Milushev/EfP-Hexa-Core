@@ -8,6 +8,7 @@
 		<graphics key="legendhidden" value="false"/>
 		<graphics key="layoutalgorithm" value="1"/>
 	</properties>
+	
 	<struct>
 		<and abstract="true" mandatory="true" name="Body_Comfort_System">
 			<and name="Human_Machine_Interface">
