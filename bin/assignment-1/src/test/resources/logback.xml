@@ -1,0 +1,34 @@
+<configuration>
+
+    <!--
+        This appender makes sure that all our log messages are printed to console. You can also write log messages into
+        files or into database using different appenders
+        http://logback.qos.ch/manual/appenders.html
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Defines the level of the root logger (e.g. Debug). The logger will therefore only log messages with the
+        configured level or higher (Info, Warn and Error). Messages that are logged with a lower level, like "Trace"
+        will be filtered by the logger.
+        Possible levels are: TRACE, DEBUG, INFO, WARN and ERROR.
+
+        http://logback.qos.ch/manual/architecture.html
+
+        Examples:
+        > When the level is set to WARN, only WARN and ERROR messages are logged
+        > When the level is set to DEBUG, only DEBUG, INFO, WARN und ERROR messages are logged
+        > When the level is set to TRACE, all messages are logged (TRACE, DEBUG, INFO, WARN and ERROR)
+    -->
+
+    <!-- By default we set the level to debug, so all message, except TRACE, are logged. -->
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
