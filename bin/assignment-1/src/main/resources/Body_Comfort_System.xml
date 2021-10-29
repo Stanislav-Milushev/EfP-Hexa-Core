@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendautolayout" value="true"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<and abstract="true" mandatory="true" name="Body_Comfort_System">
+			<and name="Human_Machine_Interface">
+				<or name="Status_LED">
+					<feature name="LED_Alarm_System"/>
+					<feature name="LED_Finger_Protection"/>
+					<feature name="LED_Central_Locking_System"/>
+				</or>
+			</and>
+			<and name="Door_System">
+				<alt name="Power_Window">
+					<feature name="Manual_Power_Window"/>
+					<feature name="Automatic_Power_Window"/>
+				</alt>
+				<feature name="Exterior_Mirror"/>
+			</and>
+			<feature mandatory="true" name="Security"/>
+		</and>
+	</struct>
+	<constraints>
+		<rule>
+			<eq>
+				<var>LED_Alarm_System</var>
+				<var>Manual_Power_Window</var>
+			</eq>
+		</rule>
+		<rule>
+			<imp>
+				<conj>
+					<var>Manual_Power_Window</var>
+					<var>LED_Finger_Protection</var>
+				</conj>
+				<var>Security</var>
+			</imp>
+		</rule>
+	</constraints>
+</featureModel>

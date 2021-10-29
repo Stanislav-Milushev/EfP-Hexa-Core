@@ -1,6 +1,8 @@
 package org.mbe.sat.assignment;
 
 import metaFeatureModel.FeatureModel;
+
+import org.logicng.io.parsers.ParserException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,8 +36,14 @@ public class Main {
             CrossTreeParser crossTreeParser = new CrossTreeParser(url.toURI().toString(), featureModel);
 
             //TODO: Create the class 'createDimacs' with should create a Dimacs File in the resources folder from the crossTreeCNF and the normal CNFTree
-
-
+                  
+                try {
+                	CreateDimacs dimacscreator = new CreateDimacs("src/main/resources/test123",crossTreeParser.getCnfCrossTree());
+             		dimacscreator.WriteDimacs();
+             		} catch (ParserException e) {
+            			// TODO Auto-generated catch block
+             		}
+            
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
