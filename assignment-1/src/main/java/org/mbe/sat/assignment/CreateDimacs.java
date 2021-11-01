@@ -12,7 +12,7 @@ import org.logicng.io.writers.FormulaDimacsFileWriter;
 public class CreateDimacs {
 		String fileNameDimacs;
 		Formula formula ;
-		String bigcnfs ;
+		String bigcnfs = "";
 	public CreateDimacs(String fileName,String formula,ArrayList<String> featuretree) throws ParserException {
 		this.formula = Formulagenerator(formula,featuretree);
 		this.formula= this.formula.cnf();
@@ -31,8 +31,9 @@ public class CreateDimacs {
 	private Formula Formulagenerator(String formula,ArrayList<String> featuretree){
 		FormulaFactory f=new FormulaFactory();
 		PropositionalParser p=new PropositionalParser(f);
-		featuretree.forEach((feature)-> bigcnfs = bigcnfs + feature);
-		bigcnfs = bigcnfs + formula;
+		featuretree.forEach((feature)-> bigcnfs += feature);
+		bigcnfs += ( " & " +  formula );
+		System.out.println(bigcnfs);
 		
 		try {
 			return p.parse(bigcnfs);

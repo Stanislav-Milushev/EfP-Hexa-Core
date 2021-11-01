@@ -44,10 +44,8 @@ public class EMFToCNFParser {
 	 * */
 	
 
-	ArrayList<String> parse (FeatureModel featureModel)
+	public ArrayList<String> parse (FeatureModel featureModel)
 	{
-
-		
 		ArrayList<String> parse = new ArrayList<>();
 		ArrayList<ArrayList<String>> Result = new ArrayList<>();
 		
@@ -56,7 +54,6 @@ public class EMFToCNFParser {
 		String featureName = featureModel.getRoot().getName();
 		EList<Feature> elist = featureModel.getRoot().getChildren();
 		elist.forEach((feature) -> getRootChildren.add(feature));
-		
 		
 		Result=generateAllGroupTypeList(getRootChildren, featureName);
 		
@@ -69,12 +66,13 @@ public class EMFToCNFParser {
 			
 			Result=generateAllGroupTypeList(getRootChildren, featureName);
 			
-					for (int i = 0; i < Result.size(); i++)
+					for (int j = 0; j < Result.size(); j++)
 					{		
-						parse.addAll(Result.get(i));
+						parse.addAll(Result.get(j));
 					}
+		}
 			
-			return parse;		
+		return parse;		
 		
 	}
 	

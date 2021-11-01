@@ -3,6 +3,7 @@ package org.mbe.sat.assignment;
 import metaFeatureModel.FeatureModel;
 
 import org.logicng.io.parsers.ParserException;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,6 +13,9 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class Main {
+	
+
+    static org.slf4j.Logger log = LoggerFactory.getLogger(XMLToEMFParser.class);
 
     public static void main(String[]args){
 
@@ -28,6 +32,16 @@ public class Main {
 
             EMFToCNFParser emfToCNFParser = new EMFToCNFParser();
             ArrayList<String> featureTree = emfToCNFParser.parse(featureModel);
+            
+            // DEBUG
+            ArrayList<String> list=new ArrayList<>();
+            list.add("v1 => v2");
+            list.add("v3 => v2 & ~v4");
+            list.add("v4 => v1");
+            list.add("v1 => v3");
+            featureTree = list; 
+            // ENDE DEBUG
+
             
 
             /**
