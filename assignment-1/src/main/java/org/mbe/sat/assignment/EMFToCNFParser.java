@@ -7,6 +7,8 @@ import metaFeatureModel.GroupType;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.management.openmbean.OpenDataException;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.impl.EClassImpl.FeatureSubsetSupplier;
 
@@ -33,7 +35,7 @@ public class EMFToCNFParser {
 	String AND = " & ";
 	String Negation = " ~";
 	String Implies = "=> ";
-	//String Alt = featureName + Implies + BraketOp + BraketOp;
+
 	
 	/*
 	 * this Implementation/ methods is incomplete. it just take the first children of the root.
@@ -44,25 +46,24 @@ public class EMFToCNFParser {
 
 	ArrayList<String> parse (FeatureModel featureModel)
 	{
-		
-		ArrayList<String> parse = new ArrayList<>();
-		ArrayList<ArrayList<String>> Result = new ArrayList<>();
-		
-		ArrayList<Feature> getRootChildren = (ArrayList<Feature>) featureModel.getRoot().getChildren();
-		
-		String featureName = featureModel.getRoot().getName();
-	
-		
-		Result=generateAllGroupTypeList(getRootChildren, featureName);
-		
-		for (int i = 0; i < Result.size(); i++) {
+			String featureName = featureModel.getRoot().getName();
+			ArrayList<String> parse = new ArrayList<>();
+			ArrayList<ArrayList<String>> Result = new ArrayList<>();
+			ArrayList<Feature> getRootChildren = new ArrayList<Feature>();
+					
 			
-			parse.addAll(Result.get(i));
-		}
-		
-		return parse;
-		
-		
+			EList<Feature>	rootchildren = featureModel.getRoot().getChildren();
+			getRootChildren.addAll(rootchildren);
+			
+			
+			Result=generateAllGroupTypeList(getRootChildren, featureName);
+			
+					for (int i = 0; i < Result.size(); i++)
+					{		
+						parse.addAll(Result.get(i));
+					}
+			
+			return parse;		
 		
 	}
 	
@@ -75,7 +76,7 @@ public class EMFToCNFParser {
 	 * or the relation they have with the parent (Or group/ ALt / Mandatory).
 	 * 
 	 * once the separation is done, they are been send to their respective method:
-	 * ALtparse method or Mandatoryparse or Orparse methods
+	 * ALtparse method or Mandatoryparse or Orparse methods or Hierarchyparse
 	 * 
 	 * three result is obtained
 	 * 
@@ -86,29 +87,48 @@ public class EMFToCNFParser {
 		ArrayList<Feature> ALTGroup = new ArrayList<>();
 		ArrayList<Feature> ORGroup = new ArrayList<>();
 		ArrayList<Feature> Mandatory = new ArrayList<>();
+		ArrayList<Feature> Optional = new ArrayList<>();
+		ArrayList<Feature> Hierarchy = new ArrayList<>();
  
 					for (Feature feature : getRootChildren) 
 					{	
-						if (feature.getGroup().getGroupType().get("ALT").equals(GroupType.ALT)) {
-							ALTGroup.add(feature);
-						}	
-				 		else if(feature.getGroup().getGroupType().get("AND").equals(GroupType.AND)) {
-				 			ORGroup.add(feature);			
-				 		}else if(feature.isMandatory()) {
-				 			Mandatory.add(feature);
-			 			} 		
-			 		}
+									if( feature.getGroup()!= null) 
+									{
+											if (feature.getGroup().getGroupType().equals(GroupType.ALT)) 
+											{
+												ALTGroup.add(feature);
+											}	
+									 		else if(feature.getGroup().getGroupType().equals(GroupType.AND)) 
+									 		{
+									 						
+									 		}else if (feature.getGroup().getGroupType().equals(GroupType.OR))
+									 		{
+									 			ORGroup.add(feature);
+									 		}
+									 		else {}
+						 			} 
+									else 
+						 			{
+							 				if(feature.isMandatory()) 
+							 				{
+									 			Mandatory.add(feature);
+							 				}
+							 				else
+							 				{
+							 					Optional.add(feature);
+							 				}
+						 			}														
 					
-				
-				Result.add(Alternativeparse(getRootChildren, featureName));
-				Result.add(Orparse(getRootChildren, featureName));
-				Result.add(Mandatoryparse(getRootChildren, featureName));
-				
-				return Result;
-					
-	}
+					}
 
-	
+					Result.add(Alternativeparse(ALTGroup, featureName));
+					Result.add(Orparse(ORGroup, featureName));
+					Result.add(Mandatoryparse(Mandatory, featureName));
+					Result.add(Hierarchyparse(Hierarchy, featureName));
+					
+					return Result;				
+
+	}
 	
 
     // Mandatory CNF methods
@@ -138,6 +158,36 @@ public class EMFToCNFParser {
            return MandatoryResult;
     }
 
+    
+    
+    // Hierarchy CNF methods
+    // FeatureName is the name of the Parent
+    // ArrayList of feature ( children of the parent)
+
+    public ArrayList<String> Hierarchyparse (ArrayList<Feature> features, String featureName)
+    {
+    	int  Lastindex = features.size();
+    	String Hierarchy = featureName + Implies + AND;
+    	ArrayList<String> HierarchyResult = new ArrayList<String>(); 
+    	
+    	for (Feature feature : features) 
+ 	   {
+					  
+							
+				if(features.size()!=Lastindex)
+					Hierarchy = Hierarchy + feature.getName()  + Implies + featureName + AND;
+				else {
+					Hierarchy = Hierarchy + feature.getName() + Implies + featureName ;
+				}
+		    		
+			    HierarchyResult.add(Hierarchy);
+						
+		  }
+    	
+           return HierarchyResult;
+    }
+    
+    
     
     // alternative CNF methods
     // FeatureName is the name of the Parent
@@ -183,6 +233,7 @@ public class EMFToCNFParser {
     // FeatureName is the name of the Parent
     // ArrayList of feature ( children of the parent)
     
+    
     public ArrayList<String>Orparse(ArrayList<Feature> features, String featureName)
     {
 	    	String Or = featureName + Implies + BraketOp + BraketOp;
@@ -198,10 +249,10 @@ public class EMFToCNFParser {
 			    				if(feature.equals(feature2)) {  								
 			    					Or = Or + feature2.getName();	    			 
 				    			}else if(features.size()==Lastindex){
-				    				Or = Or + Negation + feature2.getName(); 
+				    				Or = Or  + feature2.getName(); 
 				    			}
 				    			else {
-				    				Or = Or + Negation + feature2.getName() + OR ;
+				    				Or = Or + feature2.getName() + OR ;
 				    			}   		
 			    			}	
 			    		
