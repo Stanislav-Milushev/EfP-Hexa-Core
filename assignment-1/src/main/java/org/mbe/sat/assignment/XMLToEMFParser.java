@@ -69,7 +69,7 @@ public class XMLToEMFParser {
         NodeList rootNodeList = xmlDocument.getElementsByTagName("struct");
         
         
-        // falls kein feature model vorhanden ist, leeres featuremodel zurückgeben
+        // falls kein feature model vorhanden ist, leeres featuremodel zurueckgeben
         if(rootNodeList.getLength() <= 0 || rootNodeList.getLength() > 1) {return featureModel;} 
         
         // item 0 ist die root node <struct>
@@ -85,31 +85,38 @@ public class XMLToEMFParser {
     	// am ende setzen wir nur noch die root ins featureModel,
     	// da in der root alle features durch gruppen enthalten sind
     	featureModel.setRoot(root);
+    	//im speziellen Fall der root-Group ist das Feature zweimal in der Featureliste enthalten und wird deshalb entfernt
+    	featureModel.getGroup().get(0).getFeature().remove(0);
+    	//zum Testen der Inhalte der Listen
+    	log.info("Grouptype: " + featureModel.getGroup().get(0).getGroupType());
+    	log.info("Feature aus FeatureList: " + featureModel.getGroup().get(0).getFeature().get(0).getName());
 
         return featureModel;
     }
     
     /*
-     * Nur für die Root Node gedacht.
+     * Nur fuer die Root Node gedacht.
      * Checken ob AND OR oder ALT Gruppe ist und dementsprechend erstellen
      * */
     private Group getRootGroup(Node root) {
     	Group group = MetaFeatureModelFactory.eINSTANCE.createGroup();
-    	Node currentNode= root.getChildNodes().item(1); // Holt die erste Gruppe
-		String nodeName = currentNode.getNodeName();
+		String nodeName = root.getNodeName(); // Holt die erste Gruppe
 		switch(nodeName) {
 			case "and": {
 				group.setGroupType(AND_GROUP_IDENTIFIER.getGroupType());
+				featureModel.getGroup().add(group); // fuegt der Gruppenliste  des FeatureModels die Wurzelgruppe hinzu
 				break;
 				}
 				
 			case "or": {
 				group.setGroupType(OR_GROUP_IDENTIFIER.getGroupType());
+				featureModel.getGroup().add(group); // fuegt der Gruppenliste  des FeatureModels die Wurzelgruppe hinzu
 				break;
 			}
 				
 			case "alt": {
 				group.setGroupType(ALT_GROUP_IDENTIFIER.getGroupType());
+				featureModel.getGroup().add(group); // fuegt der Gruppenliste  des FeatureModels die Wurzelgruppe hinzu
 				break;
 			}
 		}
@@ -118,54 +125,55 @@ public class XMLToEMFParser {
     
     /*
      * Rekursive Funktion!
-     * Für jedes Child-Feature:
+     * Fuer jedes Child-Feature:
      * Checken ob es eine weitere Gruppe ist oder ein einzelnes Feature (== Ende des Astes im Baum) 
      * Erstellt ein Feature, was wieder eine Gruppe haben/sein kann (und die funktion erneut aufruft)
-     * und der aktuellen Gruppe hinzufügt
+     * und der aktuellen Gruppe hinzufuegt
      */
-    private Feature setChilds(Node parent, Group currentGroup, Feature parentFeature){
+    private void setChildren(Node parent, Group currentGroup, Feature parentFeature){
     	NodeList childList = parent.getChildNodes();
     	Feature feature = null;
+    	Group group = null;
+    	Feature parentFeatureForGroup = createFeature(parent);
     	for(int i = 0; i < childList.getLength(); i++) {
     		Node currentNode = childList.item(i);
     		if (currentNode.getNodeType() == Node.ELEMENT_NODE) { // Childelemente bekommen
     			String nodeName = currentNode.getNodeName();
     			switch(nodeName) {
     				case "and": {
-    					Group group = MetaFeatureModelFactory.eINSTANCE.createGroup();
-    					group.setGroupType(AND_GROUP_IDENTIFIER.getGroupType());
+    					group = createGroupAndSetGroupType(AND_GROUP_IDENTIFIER);
     					feature = createFeature(currentNode, group); // rekursiv
-    					// das erstellte feature wird im parent als child hinzugefügt
-    					parentFeature.getChildren().add(feature); 
+    					addToLists(currentGroup, parentFeature, feature, parentFeatureForGroup);
+    					featureModel.getGroup().add(group); //fuegt der Gruppenliste von FeaturelModel eine Gruppe hinzu
     					break;
     					}
     					
     				case "or": {
-    					Group group = MetaFeatureModelFactory.eINSTANCE.createGroup();
-    					group.setGroupType(OR_GROUP_IDENTIFIER.getGroupType());
+    					group = createGroupAndSetGroupType(OR_GROUP_IDENTIFIER);
     					feature = createFeature(currentNode, group);// rekursiv
-    					parentFeature.getChildren().add(feature);
+    					addToLists(currentGroup, parentFeature, feature, parentFeatureForGroup);
+    					featureModel.getGroup().add(group); //fuegt der Gruppenliste von FeaturelModel eine Gruppe hinzu
     					break;
     				}
     					
     				case "alt": {
-    					Group group = MetaFeatureModelFactory.eINSTANCE.createGroup();
-    					group.setGroupType(ALT_GROUP_IDENTIFIER.getGroupType());
+    					group = createGroupAndSetGroupType(ALT_GROUP_IDENTIFIER);
     					feature = createFeature(currentNode, group);// rekursiv
-    					parentFeature.getChildren().add(feature);
+    					addToLists(currentGroup, parentFeature, feature, parentFeatureForGroup);
+    					featureModel.getGroup().add(group); // fuegt der Gruppenliste von FeaturelModel eine Gruppe hinzu
     					break;
     				}
     					
     				case "feature": {
     					feature = createFeature(currentNode);// NICHT rekursiv, Ende eines Zweigs
-    					parentFeature.getChildren().add(feature);
+    					addToLists(currentGroup, parentFeature, feature, parentFeatureForGroup);
+    					
     					
     					break;
     				}	
     			}
     		}
     	}
-    	return feature;
     }
     
     
@@ -181,7 +189,7 @@ public class XMLToEMFParser {
 		feature.setName(name);
 		feature.setAbstract(abst == "true" ? true : false); // string zu bool
 		feature.setMandatory(mandatory == "true" ? true : false); // string zu bool
-		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhöht
+		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhaelt
 		log.debug("Create Feature WITHOUT Group: Feature-Name - " + name);
 		return feature;
     }
@@ -199,15 +207,15 @@ public class XMLToEMFParser {
 		feature.setName(name);
 		feature.setAbstract(abst == "true" ? true : false);
 		feature.setMandatory(mandatory == "true" ? true : false);
-		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhöht
+		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhaelt
 		feature.setGroup(group);
-		setChilds(node, group, feature);
+		setChildren(node, group, feature);
 		return feature;
     }
     
     /*
      * typesafe variante ein node attribute zu bekommen 
-     * ohne gefahr zu laufen dass eine exception schießt
+     * ohne gefahr zu laufen dass eine exception schiesst
      */
     private String getNodeAttribute(Node node, String key) {
     	if(!node.hasAttributes()) {
@@ -220,6 +228,23 @@ public class XMLToEMFParser {
     	}
     	
     	return item.getNodeValue();
+    }
+    /*Die Methode erzeugt eine Gruppe und setzt den Gruppentyp
+     * */
+    private Group createGroupAndSetGroupType(Group currentGroupType) {
+    	Group group = MetaFeatureModelFactory.eINSTANCE.createGroup();
+    	group.setGroupType(currentGroupType.getGroupType());
+    	return group;
+    }
+    
+    /*
+     * Methode fuegt Elternfeature und Child-Feature der Featureliste 
+     * der Gruppe hinzu und das Child-Feature der children-Liste hinzu*/
+    private void addToLists(Group currentGroup, Feature parentFeature, Feature feature, Feature parentFeatureForGroup) {
+    	currentGroup.getFeature().add(parentFeatureForGroup); // fuegt der Featureliste der jeweiligen Elterngruppe das Elternfeature hinzu
+    	parentFeature.getChildren().add(feature);
+    	currentGroup.getFeature().add(feature); // fuegt der Featureliste der jeweiligen Elterngruppe ein Feature hinzu
+    	
     }
     
     
