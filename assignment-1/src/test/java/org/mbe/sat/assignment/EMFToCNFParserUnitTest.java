@@ -56,7 +56,7 @@ class EMFToCNFParserUnitTest {
 //	}
 	
 	@Test
-	void testParse() {		
+	void testParseBCS() {		
 		ArrayList<String> resultList=emfToCnfParser.parse(featureModelBCS);
 		StringBuilder builder=new StringBuilder();
 		
@@ -69,5 +69,17 @@ class EMFToCNFParserUnitTest {
 	}
 	
 	
+	@Test
+	void testParseFlight() {		
+		ArrayList<String> resultList=emfToCnfParser.parse(featureModelFlight);
+		StringBuilder builder=new StringBuilder();
+		
+		for (Iterator<String> resultListIterator = resultList.iterator(); resultListIterator.hasNext();) {
+			String string = (String) resultListIterator.next();
+			builder.append(string);
+		}
+		System.out.println(builder.toString());
+		assertTrue(true);
+	}
 	
 }

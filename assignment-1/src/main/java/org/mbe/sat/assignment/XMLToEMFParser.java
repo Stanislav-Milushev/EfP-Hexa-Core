@@ -187,8 +187,23 @@ public class XMLToEMFParser {
     	
 		Feature feature = MetaFeatureModelFactory.eINSTANCE.createFeature();
 		feature.setName(name);
-		feature.setAbstract(abst == "true" ? true : false); // string zu bool
-		feature.setMandatory(mandatory == "true" ? true : false); // string zu bool
+		
+		//feature.setAbstract(abst == "true" ? true : false); // string zu bool
+		
+		if(abst.equalsIgnoreCase("true")) {
+			feature.setAbstract(true);
+		}else {
+			feature.setAbstract(false);
+		}
+		
+		//feature.setMandatory(mandatory == "true" ? true : false); // string zu bool
+		
+		if(mandatory.equalsIgnoreCase("true")) {
+			feature.setMandatory(true);
+		}else {
+			feature.setMandatory(false);
+		}
+		
 		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhaelt
 		log.debug("Create Feature WITHOUT Group: Feature-Name - " + name);
 		return feature;
@@ -205,8 +220,22 @@ public class XMLToEMFParser {
 		log.debug("Create Feature with Group: Type - "+group.getGroupType().toString()+", Feature-Name - " + name);
 		Feature feature = MetaFeatureModelFactory.eINSTANCE.createFeature();
 		feature.setName(name);
-		feature.setAbstract(abst == "true" ? true : false);
-		feature.setMandatory(mandatory == "true" ? true : false);
+		//feature.setAbstract(abst == "true" ? true : false);
+		
+		if(abst.equalsIgnoreCase("true")) {
+			feature.setAbstract(true);
+		}else {
+			feature.setAbstract(false);
+		}
+		
+		//feature.setMandatory(mandatory == "true" ? true : false);
+		
+		if(mandatory.equalsIgnoreCase("true")) {
+			feature.setMandatory(true);
+		}else {
+			feature.setMandatory(false);
+		}
+		
 		feature.setNumber(currentNumber++); // ID des Features, danach wird die global currentNumber erhaelt
 		feature.setGroup(group);
 		setChildren(node, group, feature);

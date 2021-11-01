@@ -33,14 +33,14 @@ public class Main {
             EMFToCNFParser emfToCNFParser = new EMFToCNFParser();
             ArrayList<String> featureTree = emfToCNFParser.parse(featureModel);
             
-            // DEBUG
-            ArrayList<String> list=new ArrayList<>();
-            list.add("(v1 => v2)");
-            list.add("(v3 => v2 | ~v4)");
-            list.add("(v4 => v1)");
-            list.add("(v1 => v3)");
-            featureTree = list; 
-            // ENDE DEBUG
+//            // DEBUG
+//            ArrayList<String> list=new ArrayList<>();
+//            list.add("(v1 => v2)");
+//            list.add("(v3 => v2 | ~v4)");
+//            list.add("(v4 => v1)");
+//            list.add("(v1 => v3)");
+//            featureTree = list; 
+//            // ENDE DEBUG
 
             
 
