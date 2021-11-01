@@ -28,6 +28,7 @@ public class Main {
 
             EMFToCNFParser emfToCNFParser = new EMFToCNFParser();
             ArrayList<String> featureTree = emfToCNFParser.parse(featureModel);
+            
 
             /**
              * Already implemented!!!
@@ -36,10 +37,12 @@ public class Main {
             CrossTreeParser crossTreeParser = new CrossTreeParser(url.toURI().toString(), featureModel);
 
             //TODO: Create the class 'createDimacs' with should create a Dimacs File in the resources folder from the crossTreeCNF and the normal CNFTree
-                  
+            
+            //featureTree.forEach((n)-> System.out.println(n));
                 try {
-                	CreateDimacs dimacscreator = new CreateDimacs("src/main/resources/test123",crossTreeParser.getCnfCrossTree());
+                	CreateDimacs dimacscreator = new CreateDimacs("test123",crossTreeParser.getCnfCrossTree(),featureTree);
              		dimacscreator.WriteDimacs();
+             		
              		} catch (ParserException e) {
             			// TODO Auto-generated catch block
              		}
