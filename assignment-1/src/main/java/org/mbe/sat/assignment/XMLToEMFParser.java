@@ -90,7 +90,7 @@ public class XMLToEMFParser {
     	//zum Testen der Inhalte der Listen
     	log.info("Grouptype: " + featureModel.getGroup().get(0).getGroupType());
     	log.info("Feature aus FeatureList: " + featureModel.getGroup().get(0).getFeature().get(0).getName());
-    	
+    	gzugukzg
         return featureModel;
     }
     
