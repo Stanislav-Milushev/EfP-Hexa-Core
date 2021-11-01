@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendposition" value="200,73"/>
+		<graphics key="legendautolayout" value="false"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<and abstract="true" mandatory="true" name="PC">
+			<and abstract="true" mandatory="true" name="Hardware">
+				<and mandatory="true" name="Mainboard">
+					<and mandatory="true" name="CPU">
+						<alt abstract="true" mandatory="true" name="Cooler">
+							<feature name="Water-cooling System"/>
+							<feature name="Air-cooling System"/>
+						</alt>
+					</and>
+					<feature mandatory="true" name="RAM"/>
+					<feature name="GPU"/>
+					<or abstract="true" mandatory="true" name="Storage">
+						<feature name="HDD"/>
+						<feature name="SSD"/>
+					</or>
+				</and>
+				<alt abstract="true" mandatory="true" name="Power Adapter">
+					<feature name="Modular"/>
+					<feature name="Non-Modular"/>
+				</alt>
+			</and>
+			<and abstract="true" mandatory="true" name="Software">
+				<or mandatory="true" name="OS">
+					<feature name="Windows"/>
+					<feature name="Linux"/>
+					<feature name="MacOS"/>
+				</or>
+				<and name="Drivers">
+					<feature name="GPU Driver"/>
+				</and>
+			</and>
+		</and>
+	</struct>
+	<constraints>
+		<rule>
+			<conj>
+				<imp>
+					<var>GPU</var>
+					<var>GPU Driver</var>
+				</imp>
+				<imp>
+					<var>GPU Driver</var>
+					<var>GPU</var>
+				</imp>
+			</conj>
+		</rule>
+	</constraints>
+</featureModel>
