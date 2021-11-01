@@ -48,10 +48,12 @@ public class EMFToCNFParser {
 		ArrayList<String> parse = new ArrayList<>();
 		ArrayList<ArrayList<String>> Result = new ArrayList<>();
 		
-		ArrayList<Feature> getRootChildren = (ArrayList<Feature>) featureModel.getRoot().getChildren();
+		ArrayList<Feature> getRootChildren =new ArrayList<Feature>();
 		
 		String featureName = featureModel.getRoot().getName();
-	
+		EList<Feature> elist = featureModel.getRoot().getChildren();
+		elist.forEach((feature) -> getRootChildren.add(feature));
+		
 		
 		Result=generateAllGroupTypeList(getRootChildren, featureName);
 		

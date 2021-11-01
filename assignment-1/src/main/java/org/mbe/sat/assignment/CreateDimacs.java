@@ -1,6 +1,7 @@
 package org.mbe.sat.assignment;
 
 import java.io.*;
+import java.util.ArrayList;
 
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -9,28 +10,32 @@ import org.logicng.io.parsers.PropositionalParser;
 import org.logicng.io.writers.FormulaDimacsFileWriter;
 
 public class CreateDimacs {
-		String fileName1;
-		Formula formula1 ;
-	public CreateDimacs(String fileName,String formula) throws ParserException {
-		this.formula1 = Formulagenerator(formula);
-		this.formula1=formula1.cnf();
-		this.fileName1 = fileName;
+		String fileNameDimacs;
+		Formula formula ;
+		String bigcnfs ;
+	public CreateDimacs(String fileName,String formula,ArrayList<String> featuretree) throws ParserException {
+		this.formula = Formulagenerator(formula,featuretree);
+		this.formula= this.formula.cnf();
+		this.fileNameDimacs = fileName;
     }
+	
 	public void WriteDimacs() {
 		try {
-			FormulaDimacsFileWriter.write("src/main/resources/"+fileName1, formula1, false);
+			FormulaDimacsFileWriter.write("src/main/resources/"+fileNameDimacs, formula, false);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
-	private Formula Formulagenerator(String formula){
+	private Formula Formulagenerator(String formula,ArrayList<String> featuretree){
 		FormulaFactory f=new FormulaFactory();
 		PropositionalParser p=new PropositionalParser(f);
+		featuretree.forEach((feature)-> bigcnfs = bigcnfs + feature);
+		bigcnfs = bigcnfs + formula;
 		
 		try {
-			return p.parse(formula);
+			return p.parse(bigcnfs);
 		} catch (ParserException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
