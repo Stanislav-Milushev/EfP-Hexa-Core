@@ -75,26 +75,27 @@ public class EMFToCNFParser {
 		ArrayList<String> resultList = new ArrayList<>();
 
 		//adding root-feature
+		resultList.add("\n\n   ROOT : \n");
 		resultList.addAll(this.parseRoot(featureModel.getRoot()));
 		
 		//adding alt-groups
-		//resultList.add("   ALT : ");
+		resultList.add("\n\n   ALT : \n");
 		Stream<Group> altStream = featureModel.getGroup().stream().filter(s -> s.getGroupType().equals(GroupType.ALT));
 		ArrayList<Group> altInput = (ArrayList<Group>) altStream.collect(Collectors.toList());
 		resultList.addAll(this.parseAlt(altInput));
 		
 		//adding or-groups
-		//resultList.add("   OR : ");
+		resultList.add("\n\n   OR : \n");
 		Stream<Group> orStream = featureModel.getGroup().stream().filter(s -> s.getGroupType().equals(GroupType.OR));
 		ArrayList<Group> orInput = (ArrayList<Group>) orStream.collect(Collectors.toList());
 		resultList.addAll(this.parseOr(orInput));
 		
 		//adding hierarchy-group
-		//resultList.add("   HIERARCHY : ");
+		resultList.add("\n\n   HIERARCHY : \n");
 		resultList.addAll(this.parseHierarchy(featureModel.getRoot()));
 		
 		//adding mandatory-group
-		//resultList.add("   MANDATORY : ");
+		resultList.add("\n\n   MANDATORY : \n");
 		resultList.addAll(this.parseMandatory(featureModel.getRoot()));
 		
 		if(resultList.get(resultList.size()-1).equals(AND)){
@@ -129,9 +130,9 @@ public class EMFToCNFParser {
 				result.add(OPEN);
 				//result.add(""+rootFeature.getNumber());
 				result.add(""+rootFeature.getName());
-				result.add(CLOSE);
+//				result.add(CLOSE);
 				result.add(IMPLIES);
-				result.add(OPEN);
+//				result.add(OPEN);
 				//result.add(""+child.getNumber());
 				result.add(""+child.getName());
 				result.add(CLOSE);
@@ -157,9 +158,9 @@ public class EMFToCNFParser {
 			result.add(OPEN);
 			//result.add(""+child.getNumber());
 			result.add(""+child.getName());
-			result.add(CLOSE);
+//			result.add(CLOSE);
 			result.add(IMPLIES);
-			result.add(OPEN);
+//			result.add(OPEN);
 			//result.add(""+rootFeature.getNumber());
 			result.add(""+rootFeature.getName());
 			result.add(CLOSE);
@@ -185,12 +186,12 @@ public class EMFToCNFParser {
 			result.add(OPEN);
 			//result.add("" + rootFeature.getNumber());
 			result.add("" + rootFeature.getName());
-			result.add(CLOSE);
+//			result.add(CLOSE);
 			// Alternative Variante mit getName() anstelle von getNumber()
 			//result.add("" + rootFeature.getName());
 			
 			result.add(IMPLIES);
-			result.add(OPEN);
+//			result.add(OPEN);
 
 			for (int i = 1; i < featureList.size(); i++) {
 				result.add(OPEN);
@@ -200,10 +201,10 @@ public class EMFToCNFParser {
 						result.add(NEGATION);
 					}
 					// Alternative Variante mit getNumber() anstelle von getName()
-					result.add(OPEN);
+//					result.add(OPEN);
 //					result.add("" + featureList.get(j).getNumber());
 					result.add("" + featureList.get(j).getName());
-					result.add(CLOSE);
+//					result.add(CLOSE);
 					// Alternative Variante mit getName() anstelle von getNumber()
 					//result.add("" + featureList.get(i).getName());
 					
@@ -230,24 +231,24 @@ public class EMFToCNFParser {
 			Feature rootFeature = group.getFeature().get(0);
 			EList<Feature> featureList = group.getFeature();
 			
-			result.add(OPEN);
+//			result.add(OPEN);
 //			result.add("" + rootFeature.getNumber());
 			result.add("" + rootFeature.getName());
-			result.add(CLOSE);
+//			result.add(CLOSE);
 			
 			result.add(IMPLIES);
-			result.add(OPEN);
+//			result.add(OPEN);
 
 			for (int i = 1; i < featureList.size(); i++) {
-				result.add(OPEN);
+//				result.add(OPEN);
 //				result.add(""+featureList.get(i).getNumber());
 				result.add(""+featureList.get(i).getName());
-				result.add(CLOSE);
+//				result.add(CLOSE);
 				
 				result.add(OR);
 			}
 			result.remove(result.size() - 1);
-			result.add(CLOSE);
+//			result.add(CLOSE);
 			result.add(AND);
 		}
 		
