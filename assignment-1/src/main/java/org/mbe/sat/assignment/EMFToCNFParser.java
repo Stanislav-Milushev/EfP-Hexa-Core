@@ -75,27 +75,27 @@ public class EMFToCNFParser {
 		ArrayList<String> resultList = new ArrayList<>();
 
 		//adding root-feature
-		resultList.add("\n\n   ROOT : \n");
+//		resultList.add("\n\n   ROOT : \n");
 		resultList.addAll(this.parseRoot(featureModel.getRoot()));
 		
 		//adding alt-groups
-		resultList.add("\n\n   ALT : \n");
+//		resultList.add("\n\n   ALT : \n");
 		Stream<Group> altStream = featureModel.getGroup().stream().filter(s -> s.getGroupType().equals(GroupType.ALT));
 		ArrayList<Group> altInput = (ArrayList<Group>) altStream.collect(Collectors.toList());
 		resultList.addAll(this.parseAlt(altInput));
 		
 		//adding or-groups
-		resultList.add("\n\n   OR : \n");
+//		resultList.add("\n\n   OR : \n");
 		Stream<Group> orStream = featureModel.getGroup().stream().filter(s -> s.getGroupType().equals(GroupType.OR));
 		ArrayList<Group> orInput = (ArrayList<Group>) orStream.collect(Collectors.toList());
 		resultList.addAll(this.parseOr(orInput));
 		
 		//adding hierarchy-group
-		resultList.add("\n\n   HIERARCHY : \n");
+//		resultList.add("\n\n   HIERARCHY : \n");
 		resultList.addAll(this.parseHierarchy(featureModel.getRoot()));
 		
 		//adding mandatory-group
-		resultList.add("\n\n   MANDATORY : \n");
+//		resultList.add("\n\n   MANDATORY : \n");
 		resultList.addAll(this.parseMandatory(featureModel.getRoot()));
 		
 		if(resultList.get(resultList.size()-1).equals(AND)){
