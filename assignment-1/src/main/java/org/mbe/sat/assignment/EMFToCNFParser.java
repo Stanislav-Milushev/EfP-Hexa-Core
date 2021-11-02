@@ -231,10 +231,10 @@ public class EMFToCNFParser {
 			Feature rootFeature = group.getFeature().get(0);
 			EList<Feature> featureList = group.getFeature();
 			
-//			result.add(OPEN);
+			result.add(OPEN);
 //			result.add("" + rootFeature.getNumber());
 			result.add("" + rootFeature.getName());
-//			result.add(CLOSE);
+			
 			
 			result.add(IMPLIES);
 //			result.add(OPEN);
@@ -243,12 +243,12 @@ public class EMFToCNFParser {
 //				result.add(OPEN);
 //				result.add(""+featureList.get(i).getNumber());
 				result.add(""+featureList.get(i).getName());
-//				result.add(CLOSE);
+//			result.add(CLOSE);
 				
 				result.add(OR);
 			}
 			result.remove(result.size() - 1);
-//			result.add(CLOSE);
+			result.add(CLOSE);
 			result.add(AND);
 		}
 		

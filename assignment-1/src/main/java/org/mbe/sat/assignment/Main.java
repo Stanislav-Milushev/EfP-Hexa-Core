@@ -25,23 +25,24 @@ public class Main {
          */
 
         try {
-            URL url = Main.class.getClassLoader().getResource("Body_Comfort_System.xml");
+            URL url = Main.class.getClassLoader().getResource("FelixTestModel.xml");
 
             XMLToEMFParser xmlToEMFParser = new XMLToEMFParser();
             FeatureModel featureModel = xmlToEMFParser.parse(url.toURI().toString());
 
             EMFToCNFParser emfToCNFParser = new EMFToCNFParser();
-            ArrayList<String> featureTree = emfToCNFParser.parse(featureModel);
             
-//            // DEBUG
-//            ArrayList<String> list=new ArrayList<>();
-//            list.add("(v1 => v2)");
-//            list.add("(v3 => v2 | ~v4)");
-//            list.add("(v4 => v1)");
-//            list.add("(v1 => v3)");
-//            featureTree = list; 
-//            // ENDE DEBUG
-
+            ArrayList<String> featureTree = emfToCNFParser.parse(featureModel);
+        
+			
+			/*
+			 * ArrayList<String> list=new ArrayList<>(); list.add("(v1 => v2) &");
+			 * list.add("(v3 => v2 | ~v4) &"); list.add("(ab => v1) &");
+			 * list.add("(v => vs) & (v2 => v3) & (v4 => v5) & (v6 => v7)"); featureTree
+			 * =list;
+			 */
+			 
+            
             
 
             /**

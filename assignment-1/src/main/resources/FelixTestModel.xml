@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <featureModel>
 	<properties>
-		<graphics key="legendposition" value="200,73"/>
+		<graphics key="legendposition" value="902,183"/>
 		<graphics key="legendautolayout" value="false"/>
 		<graphics key="showshortnames" value="false"/>
 		<graphics key="layout" value="horizontal"/>
@@ -15,8 +15,8 @@
 				<and mandatory="true" name="Mainboard">
 					<and mandatory="true" name="CPU">
 						<alt abstract="true" mandatory="true" name="Cooler">
-							<feature name="Water-cooling System"/>
-							<feature name="Air-cooling System"/>
+							<feature name="Water_coolingSystem"/>
+							<feature name="Air_coolingSystem"/>
 						</alt>
 					</and>
 					<feature mandatory="true" name="RAM"/>
@@ -26,9 +26,9 @@
 						<feature name="SSD"/>
 					</or>
 				</and>
-				<alt abstract="true" mandatory="true" name="Power Adapter">
+				<alt abstract="true" mandatory="true" name="PowerAdapter">
 					<feature name="Modular"/>
-					<feature name="Non-Modular"/>
+					<feature name="Non_Modular"/>
 				</alt>
 			</and>
 			<and abstract="true" mandatory="true" name="Software">
@@ -38,7 +38,7 @@
 					<feature name="MacOS"/>
 				</or>
 				<and name="Drivers">
-					<feature name="GPU Driver"/>
+					<feature name="GPUDriver"/>
 				</and>
 			</and>
 		</and>
@@ -48,10 +48,10 @@
 			<conj>
 				<imp>
 					<var>GPU</var>
-					<var>GPU Driver</var>
+					<var>GPUDriver</var>
 				</imp>
 				<imp>
-					<var>GPU Driver</var>
+					<var>GPUDriver</var>
 					<var>GPU</var>
 				</imp>
 			</conj>

@@ -31,8 +31,8 @@ public class CreateDimacs {
 	private Formula Formulagenerator(String formula,ArrayList<String> featuretree){
 		FormulaFactory f=new FormulaFactory();
 		PropositionalParser p=new PropositionalParser(f);
-		featuretree.forEach((feature)-> bigcnfs += feature + " & ");
-		bigcnfs += formula ;
+		featuretree.forEach((feature)-> bigcnfs += feature);
+		bigcnfs= bigcnfs + " & "+ formula ;
 		System.out.println(bigcnfs);
 		
 		try {
