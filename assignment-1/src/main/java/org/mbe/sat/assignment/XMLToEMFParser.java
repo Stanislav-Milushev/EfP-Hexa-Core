@@ -37,6 +37,7 @@ public class XMLToEMFParser {
     private static final Group OR_GROUP_IDENTIFIER = MetaFeatureModelFactory.eINSTANCE.createGroup();
     private FeatureModel featureModel = null;
     private int currentNumber = 1;
+    static ArrayList<Feature> featureList = new ArrayList<Feature>();
     org.slf4j.Logger log = LoggerFactory.getLogger(XMLToEMFParser.class);
     
     public XMLToEMFParser() {
@@ -79,6 +80,7 @@ public class XMLToEMFParser {
     	Group rootGroup = getRootGroup(rootNode);
     	//Root feature erstellen
         Feature root = createFeature(rootNode, rootGroup);
+        featureList.add(root);
         log.debug("Root Group Type: " +rootGroup.getGroupType().toString());
         log.debug("Root Feature Name: " + root.getName());
     	
@@ -167,11 +169,10 @@ public class XMLToEMFParser {
     				case "feature": {
     					feature = createFeature(currentNode);// NICHT rekursiv, Ende eines Zweigs
     					addToLists(currentGroup, parentFeature, feature, parentFeatureForGroup);
-    					
-    					
     					break;
     				}	
     			}
+    			featureList.add(feature);
     		}
     	}
     }
