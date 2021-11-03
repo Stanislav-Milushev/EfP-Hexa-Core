@@ -186,6 +186,10 @@ public class XMLToEMFParser {
 		String mandatory = getNodeAttribute(node, "mandatory");
     	
 		Feature feature = MetaFeatureModelFactory.eINSTANCE.createFeature();
+		
+		//TypeSafe Name. Darf keine Leerzeichen enthalten
+		name = name.replace(" ", "");
+		name = name.replace("-", "_");
 		feature.setName(name);
 		
 		//feature.setAbstract(abst == "true" ? true : false); // string zu bool
