@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendposition" value="457,31"/>
+		<graphics key="legendautolayout" value="false"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<alt abstract="true" mandatory="true" name="Parent">
+			<graphics key="collapsed" value="false"/>
+			<feature name="Child_1"/>
+			<feature name="Child_2"/>
+			<feature name="Child_3"/>
+		</alt>
+	</struct>
+</featureModel>
