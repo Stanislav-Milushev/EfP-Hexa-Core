@@ -68,7 +68,7 @@ class EMFToCNFParserTest {
 		}
 		
 		//pruefe die Alternativ-Gruppen
-		Assertions.assertTrue(formel.contains("(Power_Window => (Manual_Power_Window & ~Automatic_Power_Window) | (~Manual_Power_Window & Automatic_Power_Window))"));
+		Assertions.assertTrue(formel.contains("Power_Window => (Manual_Power_Window & ~Automatic_Power_Window) | (~Manual_Power_Window & Automatic_Power_Window)"));
 		//pruefe die Oder-Gruppen
 		Assertions.assertTrue(formel.contains("Status_LED => LED_Alarm_System | LED_Finger_Protection | LED_Central_Locking_System"));
 			
@@ -87,10 +87,10 @@ class EMFToCNFParserTest {
 					
 		}
 		//pruefe root-Feature (Hierarchie)
-		Assertions.assertTrue(formel.contains("(Hardware => PC)"));
+		Assertions.assertTrue(formel.contains("Hardware => PC"));
 				
 		//pruefe mandatory-Feature
-		Assertions.assertTrue(formel.contains("(CPU => Cooler)"));
+		Assertions.assertTrue(formel.contains("CPU => Cooler"));
 							
 	}
 	@Test
@@ -107,13 +107,13 @@ class EMFToCNFParserTest {
 			
 		}
 		//pruefe optional-Feature (Hierarchie)
-		Assertions.assertTrue(formel.contains("(Hinflug => Inlandsflug)"));
+		Assertions.assertTrue(formel.contains("Hinflug => Inlandsflug"));
 			
 		//pruefe mandatory-Feature
-		Assertions.assertTrue(formel.contains("(Hinflug => Hinflug - Start)"));
+		Assertions.assertTrue(formel.contains("Hinflug => Hinflug_Start"));
 			
 		//pruefe groessere Alternativ-Gruppe
-		Assertions.assertTrue(formel.contains("(Bezahlungsform => (PayPal & ~Kreditkarte & ~Bargeld) | (~PayPal & Kreditkarte & ~Bargeld) | (~PayPal & ~Kreditkarte & Bargeld))"));
+		Assertions.assertTrue(formel.contains("Bezahlungsform => (PayPal & ~Kreditkarte & ~Bargeld) | (~PayPal & Kreditkarte & ~Bargeld) | (~PayPal & ~Kreditkarte & Bargeld)"));
 					
 	}
 	
@@ -131,16 +131,16 @@ class EMFToCNFParserTest {
 			
 		}
 		//pruefe ob optional-Feature nicht mandatory 
-		Assertions.assertFalse(formel.contains("(Refrigerator => Water_Dispender)"));
+		Assertions.assertFalse(formel.contains("Refrigerator => Water_Dispender"));
 			
 		//pruefe mandatory-Feature
-		Assertions.assertTrue(formel.contains("(Refrigerator => Control)"));
+		Assertions.assertTrue(formel.contains("Refrigerator => Control"));
 			
 		//pruefe Oder-Gruppe
 		Assertions.assertTrue(formel.contains("Control => Buttons | Touch | Voice"));
 			
 		//pruefe ob Alternative-Gruppe nicht als Oder-Gruppe
-		Assertions.assertFalse(formel.contains("(Screen => (LCD | LED))"));
+		Assertions.assertFalse(formel.contains("Screen => LCD | LED"));
 			
 	}
   

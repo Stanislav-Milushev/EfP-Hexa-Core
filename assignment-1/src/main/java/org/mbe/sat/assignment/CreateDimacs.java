@@ -21,7 +21,7 @@ public class CreateDimacs {
 	
 	public void WriteDimacs() {
 		try {
-			FormulaDimacsFileWriter.write("src/main/resources/"+fileNameDimacs, formula, false);
+			FormulaDimacsFileWriter.write("src/main/resources/"+fileNameDimacs, formula, true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

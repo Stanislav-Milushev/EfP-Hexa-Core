@@ -191,6 +191,11 @@ public class XMLToEMFParser {
 		//TypeSafe Name. Darf keine Leerzeichen enthalten
 		name = name.replace(" ", "");
 		name = name.replace("-", "_");
+		name = name.replace("/", "_");
+		name = name.replace(".", "_");
+		name = name.replace("ä", "ae");
+		name = name.replace("ö", "oe");
+		name = name.replace("ü", "ue");
 		feature.setName(name);
 		
 		//feature.setAbstract(abst == "true" ? true : false); // string zu bool
@@ -228,6 +233,11 @@ public class XMLToEMFParser {
 		//TypeSafe Name. Darf keine Leerzeichen enthalten
 		name = name.replace(" ", "");
 		name = name.replace("-", "_");
+		name = name.replace("/", "_");
+		name = name.replace(".", "_");
+		name = name.replace("ä", "ae");
+		name = name.replace("ö", "oe");
+		name = name.replace("ü", "ue");
 		feature.setName(name);
 		//feature.setAbstract(abst == "true" ? true : false);
 		

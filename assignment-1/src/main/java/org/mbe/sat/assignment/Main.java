@@ -25,7 +25,7 @@ public class Main {
          */
 
         try {
-            URL url = Main.class.getClassLoader().getResource("FelixTestModel.xml");
+            URL url = Main.class.getClassLoader().getResource("refrigerator.xml");
 
             XMLToEMFParser xmlToEMFParser = new XMLToEMFParser();
             FeatureModel featureModel = xmlToEMFParser.parse(url.toURI().toString());
@@ -55,7 +55,7 @@ public class Main {
             
             //featureTree.forEach((n)-> System.out.println(n));
                 try {
-                	CreateDimacs dimacscreator = new CreateDimacs("test123",crossTreeParser.getCnfCrossTree(),featureTree);
+                	CreateDimacs dimacscreator = new CreateDimacs("refrigerator",crossTreeParser.getCnfCrossTree(),featureTree);
              		dimacscreator.WriteDimacs();
              		
              		} catch (ParserException e) {
