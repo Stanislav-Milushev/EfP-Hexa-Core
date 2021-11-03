@@ -219,6 +219,10 @@ public class XMLToEMFParser {
 		String mandatory = getNodeAttribute(node, "mandatory");
 		log.debug("Create Feature with Group: Type - "+group.getGroupType().toString()+", Feature-Name - " + name);
 		Feature feature = MetaFeatureModelFactory.eINSTANCE.createFeature();
+		
+		//TypeSafe Name. Darf keine Leerzeichen enthalten
+		name = name.replace(" ", "");
+		name = name.replace("-", "_");
 		feature.setName(name);
 		//feature.setAbstract(abst == "true" ? true : false);
 		
