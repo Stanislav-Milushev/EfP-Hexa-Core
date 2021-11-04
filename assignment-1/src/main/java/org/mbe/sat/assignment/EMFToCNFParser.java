@@ -17,11 +17,11 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.impl.EClassImpl.FeatureSubsetSupplier;
 
 /**
- * @author Darwin
+ * @author Momo Johnson
  *
  */
 /**
- * @author Johnson momo
+ * @author Darwin Brambor
  *
  */
 public class EMFToCNFParser {
@@ -34,17 +34,38 @@ public class EMFToCNFParser {
 	 * Negation: ~ Implies: => Equals: <=>
 	 *
 	 */
-
+	
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String SPACE = " ";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String OPEN = "(";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String CLOSE = ")";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String OR = " | ";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String AND = " & ";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String NEGATION = "~";
+	/**
+	 * chars and strings for creation of the CNF-formula 
+	 */
 	final static String IMPLIES = " => ";
 
 	
-	/*
+	/**
 	 * This method takes as parameter FeatureModel. From the FeatureModel with the use Stream and the
 	 *  to sorted put the different groups elements:(ALT,OR,AND,mandatory and optional).
 	 *  root-feature	<== parseRoot Method
@@ -53,10 +74,9 @@ public class EMFToCNFParser {
 	 *  hierarchy-group <== parsehierarchy Method
 	 *  mandatory-group <== parseMandatory Method
 	 *  
+	 *  @param featureModel - takes an feature model in form of an EMF-object and converts it into an ArrayList with type String
 	 */
-
 	public ArrayList<String> parse(FeatureModel featureModel) {
-		
 		
 		ArrayList<String> resultList = new ArrayList<>();
 
@@ -91,13 +111,12 @@ public class EMFToCNFParser {
 		return resultList;
 	}
 	
-	
-	
 
-	/*
+	/**
 	 *  parseRoot method = Root
 	 *  this method takes an object of type Feature, which the root of the tree (Root feature).
 	 *  
+	 *  @param rootFeature of the underlying feature diagram
 	 *  @return ArrayList of String name as "Result"
 	 */
 	private ArrayList<String> parseRoot(Feature rootFeature){
@@ -114,13 +133,14 @@ public class EMFToCNFParser {
 	
 	
 	
-	/*
+	/**
 	 *  parseMandatory method = Mandatory relationship
 	 *  this method takes an object of type Feature, which the root of the tree (Root feature).
 	 *  
 	 *  Each features of the tree and its children are being sorted out to form the mandatory relationship.
 	 *  This is obtained through a recursive method implemented by the last For loop at the end of this method 
-	 *  
+	 * 
+	 *  @param rootFeature of the underlying feature diagram 
 	 *  @return ArrayList of String name as "Result"
 	 */	
 	private ArrayList<String> parseMandatory(Feature rootFeature){
@@ -152,17 +172,16 @@ public class EMFToCNFParser {
 		return result;
 	}
 	
-	/*
+	/**
 	 *  parseHierarchy method = Hierarchy CNF methods
 	 *  this method takes an object of type Feature, which the root of the tree (Root feature).
 	 *  
 	 *  Each features of the tree and its children are being sorted out to form the hierarchy_edge.
 	 *  This is obtained through a recursive method implemented by the last For loop at the end of this method 
 	 *  
+	 *  @param rootFeature of the underlying feature diagram 
 	 *  @return ArrayList of String name as "Result"
 	 */
-	
-	
 	private ArrayList<String> parseHierarchy(Feature rootFeature){
 		ArrayList<String> result=new ArrayList<>();
 		EList<Feature> childFeatures=rootFeature.getChildren();
@@ -190,10 +209,12 @@ public class EMFToCNFParser {
 	
 	
 	
-	/*
+	/**
 	 *  parseAlt method = Altenative-Groupe CNF methods
-	 * this method takes an ArrayList of Group with the "Grouptype ALT (OrGroup) with name AltInput"
+	 * this method takes an ArrayList of Group with the "Grouptype ALT (Alt Group) with name altInput"
 	 *  and
+	 *  
+	 *  @param altInput / an ArrayList storing all Group-Objects of the underlying feature model with GroupType ALT
 	 *  @return ArrayList of String name as "Result"
 	 */
 	
@@ -249,10 +270,11 @@ public class EMFToCNFParser {
 	
 	
 	
-	/*
-	 *  parseOr method = Or-Groupe CNF 
-	 *  this method takes an ArrayList of Group with the "Grouptype OR (OrGroup)"  with name ortInput
+	/**
+	 *  parseOr method = Or-Group CNF 
+	 *  this method takes an ArrayList of Group with the "Grouptype OR (Or Group)"  with name orInput
 	 *  
+	 *  @param orInput
 	 *  @return ArrayList of String name as "Result"
 	 */
 	private ArrayList<String> parseOr(ArrayList<Group> orInput) {
