@@ -62,7 +62,6 @@ public class CreateDimacs {
 			}
 
 			sc.close();
-			File f2 = new File("src/main/resources/" + fileNameDimacs + "M" + ".cnf");
 			PrintWriter pw = new PrintWriter(new FileOutputStream(new File("src/main/resources/" + fileNameDimacs + "M" + ".cnf"), true));
 			BufferedReader br = new BufferedReader(new FileReader("src/main/resources/" + fileNameDimacs + ".cnf"));
 			String line = br.readLine();
