@@ -1,0 +1,78 @@
+c 1 pc
+c 10 Core_i9
+c 11 Mainboard
+c 12 ITX_Mainboard
+c 13 ATX_Mainboard
+c 14 Speicher
+c 15 Hauptspeicher
+c 16 Ram_1
+c 17 DDR_4GB_1
+c 18 DDR_8GB_1
+c 19 Ram_2
+c 2 Gehäuse
+c 20 DDR_4GB_2
+c 21 DDR_8GB_2
+c 22 Persistenter_Speicher
+c 23 SSD
+c 24 Festplatte
+c 25 Netzteil
+c 26 Beleuchtung
+c 3 ATX_Gehäuse
+c 4 ITX_Gehäuse
+c 5 Grafik
+c 6 RTX_3070
+c 7 Integrierte_Grafik
+c 8 CPU
+c 9 Ryzen_APU
+p cnf 26 51
+1 0
+-2 1 0
+-1 2 0
+-5 1 0
+-1 5 0
+-8 1 0
+-1 8 0
+-11 1 0
+-1 11 0
+-14 1 0
+-1 14 0
+-25 1 0
+-1 25 0
+1 -26 0
+-3 -4 0
+3 4 -2 0
+-3 2 0
+-4 2 0
+6 7 -5 0
+-6 5 0
+-7 5 0
+-9 -10 0
+9 10 -8 0
+-9 8 0
+-10 8 0
+-12 -13 0
+12 13 -11 0
+-12 11 0
+-13 11 0
+-15 14 0
+-14 15 0
+-22 14 0
+-14 22 0
+16 19 -15 0
+-16 15 0
+-19 15 0
+-17 -18 0
+17 18 -16 0
+-17 16 0
+-18 16 0
+-20 -21 0
+20 21 -19 0
+-20 19 0
+-21 19 0
+-23 22 0
+-22 23 0
+22 -24 0
+-4 -13 0
+-9 7 0
+-10 6 0
+-12 -19 0

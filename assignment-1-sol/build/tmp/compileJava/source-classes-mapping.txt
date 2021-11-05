@@ -1,0 +1,50 @@
+metaFeatureModel/impl/FeatureImpl.java
+ metaFeatureModel.impl.FeatureImpl
+org/mbe/sat/assignment/EMFToCNFParser.java
+ org.mbe.sat.assignment.EMFToCNFParser
+metaFeatureModel/impl/ExcludeConstraintImpl.java
+ metaFeatureModel.impl.ExcludeConstraintImpl
+metaFeatureModel/Feature.java
+ metaFeatureModel.Feature
+metaFeatureModel/Constraint.java
+ metaFeatureModel.Constraint
+metaFeatureModel/MetaFeatureModelPackage.java
+ metaFeatureModel.MetaFeatureModelPackage
+ metaFeatureModel.MetaFeatureModelPackage$Literals
+metaFeatureModel/impl/MetaFeatureModelPackageImpl.java
+ metaFeatureModel.impl.MetaFeatureModelPackageImpl
+metaFeatureModel/MetaFeatureModelFactory.java
+ metaFeatureModel.MetaFeatureModelFactory
+metaFeatureModel/Group.java
+ metaFeatureModel.Group
+metaFeatureModel/FeatureModel.java
+ metaFeatureModel.FeatureModel
+org/mbe/sat/assignment/CrossTreeParser.java
+ org.mbe.sat.assignment.CrossTreeParser
+org/mbe/sat/assignment/XMLToEMFParser.java
+ org.mbe.sat.assignment.XMLToEMFParser
+metaFeatureModel/util/MetaFeatureModelAdapterFactory.java
+ metaFeatureModel.util.MetaFeatureModelAdapterFactory
+ metaFeatureModel.util.MetaFeatureModelAdapterFactory$1
+metaFeatureModel/impl/ConstraintImpl.java
+ metaFeatureModel.impl.ConstraintImpl
+metaFeatureModel/impl/RequireConstraintImpl.java
+ metaFeatureModel.impl.RequireConstraintImpl
+metaFeatureModel/GroupType.java
+ metaFeatureModel.GroupType
+metaFeatureModel/ExcludeConstraint.java
+ metaFeatureModel.ExcludeConstraint
+metaFeatureModel/impl/MetaFeatureModelFactoryImpl.java
+ metaFeatureModel.impl.MetaFeatureModelFactoryImpl
+metaFeatureModel/impl/GroupImpl.java
+ metaFeatureModel.impl.GroupImpl
+metaFeatureModel/impl/FeatureModelImpl.java
+ metaFeatureModel.impl.FeatureModelImpl
+metaFeatureModel/util/MetaFeatureModelSwitch.java
+ metaFeatureModel.util.MetaFeatureModelSwitch
+metaFeatureModel/RequireConstraint.java
+ metaFeatureModel.RequireConstraint
+org/mbe/sat/assignment/CreateDimacs.java
+ org.mbe.sat.assignment.CreateDimacs
+org/mbe/sat/assignment/Main.java
+ org.mbe.sat.assignment.Main

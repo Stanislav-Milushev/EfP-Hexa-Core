@@ -1,0 +1,3 @@
+// Defines the name of the project. This corresponds to the maven artifact ID.
+rootProject.name = 'assignment-1'
+

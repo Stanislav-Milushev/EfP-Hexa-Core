@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendautolayout" value="true"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<and abstract="true" mandatory="true" name="Refrigerator">
+			<alt name="Screen">
+				<feature name="LCD"/>
+				<feature name="LED"/>
+			</alt>
+			<feature name="Temperature_Regulation_Control"/>
+			<or mandatory="true" name="Control">
+				<feature name="Buttons"/>
+				<feature name="Touch"/>
+				<feature name="Voice"/>
+			</or>
+			<feature name="Water_Dispender"/>
+			<feature name="Ice_Dispender"/>
+		</and>
+	</struct>
+	<constraints>
+		<rule>
+			<imp>
+				<var>Temperature_Regulation_Control</var>
+				<var>Buttons</var>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Touch</var>
+				<var>Screen</var>
+			</imp>
+		</rule>
+	</constraints>
+</featureModel>

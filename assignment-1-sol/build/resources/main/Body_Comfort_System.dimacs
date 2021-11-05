@@ -1,0 +1,32 @@
+c 1 Body_Comfort_System
+c 10 Automatic_Power_Window
+c 11 Exterior_Mirror
+c 12 Security
+c 2 Human_Machine_Interface
+c 3 Status_LED
+c 4 LED_Alarm_System
+c 5 LED_Finger_Protection
+c 6 LED_Central_Locking_System
+c 7 Door_System
+c 8 Power_Window
+c 9 Manual_Power_Window
+p cnf 12 19
+1 0
+1 -2 0
+1 -7 0
+-12 1 0
+-1 12 0
+2 -3 0
+4 5 6 -3 0
+-4 3 0
+-5 3 0
+-6 3 0
+7 -8 0
+7 -11 0
+-9 -10 0
+9 10 -8 0
+-9 8 0
+-10 8 0
+-4 9 0
+-9 4 0
+-9 -5 12 0

@@ -1,0 +1,29 @@
+c 1 Refrigerator
+c 10 Water_Dispender
+c 11 Ice_Dispender
+c 2 Screen
+c 3 LCD
+c 4 LED
+c 5 Temperature_Regulation_Control
+c 6 Control
+c 7 Buttons
+c 8 Touch
+c 9 Voice
+p cnf 11 17
+1 0
+1 -2 0
+1 -5 0
+-6 1 0
+-1 6 0
+1 -10 0
+1 -11 0
+-3 -4 0
+3 4 -2 0
+-3 2 0
+-4 2 0
+7 8 9 -6 0
+-7 6 0
+-8 6 0
+-9 6 0
+-5 7 0
+-8 2 0

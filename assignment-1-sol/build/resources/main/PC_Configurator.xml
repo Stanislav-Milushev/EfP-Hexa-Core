@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<featureModel>
+	<properties>
+		<graphics key="legendposition" value="30,219"/>
+		<graphics key="legendautolayout" value="false"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
+	<struct>
+		<and abstract="true" mandatory="true" name="pc">
+			<graphics key="collapsed" value="false"/>
+			<alt abstract="true" mandatory="true" name="Gehäuse">
+				<feature name="ATX_Gehäuse"/>
+				<feature name="ITX_Gehäuse"/>
+			</alt>
+			<or abstract="true" mandatory="true" name="Grafik">
+				<feature name="RTX_3070"/>
+				<feature name="Integrierte_Grafik"/>
+			</or>
+			<alt mandatory="true" name="CPU">
+				<feature name="Ryzen_APU"/>
+				<feature name="Core_i9"/>
+			</alt>
+			<alt abstract="true" mandatory="true" name="Mainboard">
+				<feature name="ITX_Mainboard"/>
+				<feature name="ATX_Mainboard"/>
+			</alt>
+			<and abstract="true" mandatory="true" name="Speicher">
+				<or abstract="true" mandatory="true" name="Hauptspeicher">
+					<alt abstract="true" name="Ram_1">
+						<feature name="DDR_4GB_1"/>
+						<feature name="DDR_8GB_1"/>
+					</alt>
+					<alt abstract="true" name="Ram_2">
+						<feature name="DDR_4GB_2"/>
+						<feature name="DDR_8GB_2"/>
+					</alt>
+				</or>
+				<and abstract="true" mandatory="true" name="Persistenter_Speicher">
+					<feature mandatory="true" name="SSD"/>
+					<feature name="Festplatte"/>
+				</and>
+			</and>
+			<feature mandatory="true" name="Netzteil"/>
+			<feature name="Beleuchtung"/>
+		</and>
+	</struct>
+	<constraints>
+		<rule>
+			<imp>
+				<var>ITX_Gehäuse</var>
+				<not>
+					<var>ATX_Mainboard</var>
+				</not>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Ryzen_APU</var>
+				<var>Integrierte_Grafik</var>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>Core_i9</var>
+				<var>RTX_3070</var>
+			</imp>
+		</rule>
+		<rule>
+			<imp>
+				<var>ITX_Mainboard</var>
+				<not>
+					<var>Ram_2</var>
+				</not>
+			</imp>
+		</rule>
+	</constraints>
+</featureModel>
