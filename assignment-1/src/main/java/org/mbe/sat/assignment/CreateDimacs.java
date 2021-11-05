@@ -2,6 +2,7 @@ package org.mbe.sat.assignment;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -29,7 +30,8 @@ public class CreateDimacs {
 	 * @param fileName    of the target .cnf/dimacs-file
 	 * @param formula     / constraint-formula / cross-tree formula
 	 * @param featuretree / ArrayList-output of the EMFToCNF parser containing the
-	 *                    separated cnf-formula without cross-tree edges / feature-tree
+	 *                    separated cnf-formula without cross-tree edges /
+	 *                    feature-tree
 	 * @throws ParserException
 	 */
 	public CreateDimacs(String fileName, String formula, ArrayList<String> featuretree) throws ParserException {
@@ -44,6 +46,41 @@ public class CreateDimacs {
 	public void WriteDimacs() {
 		try {
 			FormulaDimacsFileWriter.write("src/main/resources/" + fileNameDimacs, formula, true);
+
+			File f1 = new File("src/main/resources/" + fileNameDimacs + ".map");
+			Scanner sc = new Scanner(f1);
+			ArrayList<String> VarMaping = new ArrayList();
+			ArrayList<String> NewMaping = new ArrayList();
+			while (sc.hasNextLine()) {
+				VarMaping.add(sc.nextLine().toString().replaceAll("\\d", "").replace(";", ""));
+			}
+
+			for (int i = 0; i < VarMaping.size(); i++) {
+
+				NewMaping.add("c " + (i + 1) + " " + VarMaping.get(i));
+				System.out.println(NewMaping.get(i)); 
+			}
+
+			sc.close();
+			File f2 = new File("src/main/resources/" + fileNameDimacs + "M" + ".cnf");
+			PrintWriter pw = new PrintWriter(new FileOutputStream(new File("src/main/resources/" + fileNameDimacs + "M" + ".cnf"), true));
+			BufferedReader br = new BufferedReader(new FileReader("src/main/resources/" + fileNameDimacs + ".cnf"));
+			String line = br.readLine();
+			while (NewMaping.isEmpty()==false) {
+				pw.println(NewMaping.get(0));
+				NewMaping.remove(0);
+			}
+			while(line != null)
+	        {
+	            pw.println(line);
+	            line = br.readLine();
+	        }
+			
+	          
+	        // closing resources
+	        br.close();
+	        pw.close();
+	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,7 +89,8 @@ public class CreateDimacs {
 	}
 
 	/**
-	 * generates a final cnf-formula by merging the cross-tree- and feature-tree-formula
+	 * generates a final cnf-formula by merging the cross-tree- and
+	 * feature-tree-formula
 	 * 
 	 * @param formula
 	 * @param featuretree
