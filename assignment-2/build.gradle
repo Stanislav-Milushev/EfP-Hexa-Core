@@ -41,6 +41,10 @@ repositories {
 
 dependencies {
 
+    //Custom dependencies
+    // https://mvnrepository.com/artifact/jfree/jfreechart
+    implementation group: 'jfree', name: 'jfreechart', version: '1.0.13'
+
     // Provides useful set operations that are mainly used by the CNF formula model
     // https://github.com/google/guava
     // https://guava.dev/
