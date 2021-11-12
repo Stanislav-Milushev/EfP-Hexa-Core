@@ -1,9 +1,12 @@
 package org.mbe.sat.assignment.gui;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.ApplicationFrame;
@@ -16,136 +19,182 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class BarChartGui extends ApplicationFrame implements IBarChartGui{
+public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
-    //values
+	// values
 
-    private IBarChartFactory factory;
-    private String title;
-    private String[] names;
-    private double[] values;
-    private String[] categories;
+	private IBarChartFactory factory;
+	private String title;
+	private String[] names;
+	private double[] values;
+	private String[] categories;
+	private final int MAX_NUMBER_OF_DATASETS = 8;
+	private int pointer;
+	// components
 
-    //components
+	// private JFreeChart prevChart;
+	private JFreeChart barChart;
+	// private JFreeChart nextChart;
 
-    private JFreeChart barChart;
-    private ChartPanel chartPanel;
-    private JPanel container;
-    private JPanel subcontainer;
-    private JButton exitButton;
-    private JButton exportButton;
+	private ChartPanel chartPanel;
+	private JPanel container;
+	private JPanel subcontainer;
+	private JButton exitButton;
+	private JButton exportButton;
+	private JButton nextButton;
+	private JButton prevButton;
 
-    public BarChartGui(IBarChartFactory factory, String chartTitle, double[] values, String[] names, String[] categories){
-        super("Bar-Chart");
+	public BarChartGui(IBarChartFactory factory, String chartTitle, double[] values, String[] names,
+			String[] categories) {
+		super("Statistics");
 
-        this.factory=factory;
-        this.title=chartTitle;
-        this.values=values;
-        this.names=names;
-        this.categories=categories;
+		this.factory = factory;
+		this.title = chartTitle;
+		this.values = values;
+		this.names = names;
+		this.categories = categories;
 
-        this.init();
-    }
+		this.pointer = 0;
 
-    private void init(){
+		this.init();
+	}
 
-        //init components
+	private void init() {
 
-        this.barChart= ChartFactory.createBarChart(this.title, "Benchmark", "Time",
-                createDataset(),PlotOrientation.VERTICAL,
-                true, true, false);
+		// init components
 
-        this.chartPanel=new ChartPanel(this.barChart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(500, 500));
+		this.barChart = ChartFactory.createBarChart(this.title, "Benchmark-File", "Time in Miliseconds",
+				createDataset(), PlotOrientation.VERTICAL, true, true, false);
 
-        this.exitButton=new JButton("EXIT");
-        this.exportButton=new JButton("EXPORT");
+		this.chartPanel = new ChartPanel(this.barChart);
+		chartPanel.setPreferredSize(new java.awt.Dimension(1000, 650));
 
-        this.container=new JPanel();
-        container.setLayout(new BorderLayout());
+		this.exitButton = new JButton("EXIT");
+		this.exportButton = new JButton("EXPORT");
+		exportButton.setEnabled(false);
+		this.nextButton = new JButton("NEXT ->");
+		this.prevButton = new JButton("<- PREV");
 
-        this.subcontainer=new JPanel();
-        this.subcontainer.add(this.exportButton);
-        this.subcontainer.add(this.exitButton);
+		this.container = new JPanel();
+		container.setLayout(new BorderLayout());
 
-        container.add(chartPanel,BorderLayout.CENTER);
-        container.add(subcontainer,BorderLayout.SOUTH);
+		this.subcontainer = new JPanel();
+		this.subcontainer.add(prevButton);
+		this.subcontainer.add(nextButton);
 
-        setContentPane(container);
-        this.pack();
-        RefineryUtilities.centerFrameOnScreen(this);
-        this.setVisible(true);
+		this.subcontainer.add(this.exportButton);
+		this.subcontainer.add(this.exitButton);
 
-        //Add Listener
+		container.add(chartPanel, BorderLayout.CENTER);
+		container.add(subcontainer, BorderLayout.SOUTH);
 
-        this.exitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                requestExit();
-            }
-        });
+		setContentPane(container);
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
 
-        this.exportButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                requestExport();
-            }
-        });
+		// Add Listener
 
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                requestExit();
-            }
-        });
-    }
+		this.exitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				requestExit();
+			}
+		});
 
-    private CategoryDataset createDataset(){
-        final DefaultCategoryDataset dataset=new DefaultCategoryDataset();
+		this.exportButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				requestExport();
+			}
+		});
 
-        /*
-        reference :
-        dataset.addValue(1.0, fiat, speed);
-        dataset.addValue(3.0, fiat, userrating);
-        dataset.addValue(5.0, fiat, millage);
-        dataset.addValue(5.0, fiat, safety);
+		this.prevButton.addActionListener(new ActionListener() {
 
-        dataset.addValue(5.0, audi, speed);
-        dataset.addValue(6.0, audi, userrating);
-        dataset.addValue(10.0, audi, millage);
-        dataset.addValue(4.0, audi, safety);
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pointer -= MAX_NUMBER_OF_DATASETS;
+				if (pointer <= 0) {
+					pointer = 0;
+				}
+				updateChart();
+			}
+		});
 
-        dataset.addValue(4.0, ford, speed);
-        dataset.addValue(2.0, ford, userrating);
-        dataset.addValue(3.0, ford, millage);
-        dataset.addValue(6.0, ford, safety);
+		this.nextButton.addActionListener(new ActionListener() {
 
-        dataset.addValue(4.0, bmw, speed);
-        dataset.addValue(2.0, bmw, userrating);
-        dataset.addValue(3.0, bmw, millage);
-        dataset.addValue(6.0, bmw, safety);
-         */
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pointer += MAX_NUMBER_OF_DATASETS;
+				if (pointer >= values.length) {
+					pointer -= MAX_NUMBER_OF_DATASETS;
+				}
+				updateChart();
+			}
+		});
 
-        for(int i=0; i<this.categories.length; i++){
-            for(int j=0; j<this.names.length; j++){
-                dataset.addValue(this.values[j],this.names[j],this.categories[i]);
-            }
-        }
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				requestExit();
+			}
+		});
 
-        return dataset;
-    }
+		
+	}
 
-    @Override
-    public void requestExport() {
-        factory.requestExport();
-    }
+	private void updateChart() {
+		barChart = ChartFactory.createBarChart(this.title, "Benchmark-File", "Time in Miliseconds", createDataset(),
+				PlotOrientation.VERTICAL, true, true, false);
+		chartPanel.setChart(barChart);
+	}
 
-    @Override
-    public void requestExit() {
-        factory.requestExit();
-    }
+	private CategoryDataset createDataset() {
+		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-    public void close(){
-        this.dispose();
-    }
+		/*
+		 * reference : dataset.addValue(1.0, fiat, speed); dataset.addValue(3.0, fiat,
+		 * userrating); dataset.addValue(5.0, fiat, millage); dataset.addValue(5.0,
+		 * fiat, safety);
+		 * 
+		 * dataset.addValue(5.0, audi, speed); dataset.addValue(6.0, audi, userrating);
+		 * dataset.addValue(10.0, audi, millage); dataset.addValue(4.0, audi, safety);
+		 * 
+		 * dataset.addValue(4.0, ford, speed); dataset.addValue(2.0, ford, userrating);
+		 * dataset.addValue(3.0, ford, millage); dataset.addValue(6.0, ford, safety);
+		 * 
+		 * dataset.addValue(4.0, bmw, speed); dataset.addValue(2.0, bmw, userrating);
+		 * dataset.addValue(3.0, bmw, millage); dataset.addValue(6.0, bmw, safety);
+		 */
+
+//        for(int i=0; i<this.categories.length; i++){
+//            for(int j=0; j<this.names.length; j++){
+//                dataset.addValue(this.values[i],this.names[j],this.categories[i]);
+//            }
+//        }
+
+		for (int i = 0; i < this.MAX_NUMBER_OF_DATASETS; i++) {
+			if ((this.pointer + i) >= this.values.length) {
+				// this.pointer=0;
+				break;
+			}
+			dataset.addValue(this.values[this.pointer + i], this.names[0], this.categories[this.pointer + i]);
+		}
+		return dataset;
+	}
+
+	@Override
+	public void requestExport() {
+		factory.requestExport();
+	}
+
+	@Override
+	public void requestExit() {
+		factory.requestExit();
+	}
+
+	public void close() {
+		this.dispose();
+	}
+
 }
