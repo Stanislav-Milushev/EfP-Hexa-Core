@@ -25,7 +25,6 @@ public class Simplifier implements ISimplifier<CnfFormula, Assignment> {
         LOG.debug("Simplifying formula '{}' with assignment '{}'", cnfFormula, assignment);
 
         CnfFormula evaluatedFormula = cnfFormula.evaluate(assignment);
-        // TODO: Simplify evaluated formula
         
         Set<Or<Atom>> allClauses = evaluatedFormula.getClauses(); // alle klauseln holen
         Iterator<Or<Atom>> clauseIterator = allClauses.iterator(); // iterator erstellen
