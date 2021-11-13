@@ -60,10 +60,10 @@ public class BenchmarkRunner {
 
 		BenchmarkRunner runner = new BenchmarkRunner();
 		try {
-			// runner.runTrivial(new BaseSolver());
+			 runner.runTrivial(new BaseSolver());
 			// runner.runEasy(new BaseSolver());
-			//runner.runMedium(new BaseSolver());
-			 runner.runHard(new BaseSolver());
+			// runner.runMedium(new BaseSolver());
+			// runner.runHard(new BaseSolver());
 			// runner.runInsane(new BaseSolver());
 		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block
