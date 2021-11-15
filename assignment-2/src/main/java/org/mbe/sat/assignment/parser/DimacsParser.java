@@ -33,21 +33,19 @@ public class DimacsParser implements IFormulaParser<CnfFormula> {
 	@Override
 	public CnfFormula parse(List<String> formulaLines) throws IOException {
 		Set<Or<Atom>> op = new HashSet<Or<Atom>>();
-		// TODO: Convert given lines of DIMACS file into instance of CnfFormula
-		// You may ignore all other packages besides "org.mbe.sat.core.model.formula"
 		boolean readmode = false;
 		for (String string : formulaLines) {
-			if (readmode) {
+			if (readmode && string.startsWith("c ")) {
 				String newstring = string.trim();
 				String[] splited = newstring.split("\\s+");
 				Set variablen = new HashSet<Formula>();
-				for (Object ob : splited) {
-					if (Integer.parseInt(ob.toString()) != 0) {
-						boolean minustest = !ob.toString().contains("-");
-						String t = ob.toString().replace("-", "");
-						Variable x = new Variable(t);
-						Literal x1 = new Literal(x, minustest);
-						variablen.add(x1);
+				for (Object slitedvar : splited) {
+					if (Integer.parseInt(slitedvar.toString()) != 0) {
+						boolean minustest = !slitedvar.toString().contains("-");
+						String t = slitedvar.toString().replace("-", "");
+						Variable newVar = new Variable(t);
+						Literal newLit = new Literal(newVar, minustest);
+						variablen.add(newLit);
 						// System.out.println(ob);
 					}
 
