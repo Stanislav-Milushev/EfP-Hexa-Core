@@ -31,12 +31,14 @@ public class BaseSolver implements ISolver<CnfFormula, Optional<Assignment>> {
         Simplifier simplifier = new Simplifier();
         
         // Get boolean list with all possible boolean combinations 
-        List<boolean[]> allPossibleCombinations = booleanCombinator.getAllPossibleCombinations();
+      
         Assignment assignment = new Assignment();
+        int numberOfCombinations = (int)Math.pow(2, variables.size());
         int index;
               
-        for(boolean[] combination: allPossibleCombinations) {
+        for(int i = 0; i + 1 <= numberOfCombinations; i++ ) {
         	// Reset assignment and index
+        	boolean[] combination = booleanCombinator.getCombinationByBitIndex(i);
         	assignment = Assignment.empty();
         	index = 0;
         	
@@ -53,7 +55,7 @@ public class BaseSolver implements ISolver<CnfFormula, Optional<Assignment>> {
         	}
         	
         }
-        
+                
         // Return an empty Optional, if no satisfying assignment was found.
         return Optional.empty();
     }

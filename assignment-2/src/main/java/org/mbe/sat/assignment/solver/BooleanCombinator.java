@@ -42,4 +42,9 @@ public class BooleanCombinator {
         bs.stream().forEach(i -> result[i] = true);
         return result;
 	}
+	
+	
+	public boolean[] getCombinationByBitIndex(int index) {
+		return bitSetToArray(BitSet.valueOf(new long[] { index }), this.numberOfVariables);
+	}
 }
