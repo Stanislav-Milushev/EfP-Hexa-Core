@@ -29,60 +29,41 @@ import java.util.Set;
 
 public class DimacsParser implements IFormulaParser<CnfFormula> {
 
+	
 	@Override
 	public CnfFormula parse(List<String> formulaLines) throws IOException {
 		Set<Or<Atom>> op = new HashSet<Or<Atom>>();
-
-		/*
-		 * Set kek1 = new HashSet<Formula>();
-		 * 
-		 * Variable xb = new Variable("b"); Literal x1b = new Literal(x, true);
-		 * 
-		 * kek1.add(x1b); kek1.add(xb);
-		 * 
-		 * Or<Atom> kekw1 = new Or<Atom>(kek1);
-		 * 
-		 * op.add(kekw1);
-		 */
 		// TODO: Convert given lines of DIMACS file into instance of CnfFormula
 		// You may ignore all other packages besides "org.mbe.sat.core.model.formula"
 		boolean readmode = false;
 		for (String string : formulaLines) {
 			if (readmode) {
-
 				String newstring = string.trim();
-
 				String[] splited = newstring.split("\\s+");
-
 				Set variablen = new HashSet<Formula>();
 				for (Object ob : splited) {
-					if (Integer.parseInt(ob.toString())!= 0) {
+					if (Integer.parseInt(ob.toString()) != 0) {
 						boolean minustest = !ob.toString().contains("-");
 						String t = ob.toString().replace("-", "");
 						Variable x = new Variable(t);
 						Literal x1 = new Literal(x, minustest);
 						variablen.add(x1);
-						//System.out.println(ob);
+						// System.out.println(ob);
 					}
 
 				}
 
-				Or<Atom> kekw = new Or<Atom>(variablen);
-				op.add(kekw);
+				Or<Atom> tempvar = new Or<Atom>(variablen);
+				op.add(tempvar);
 			}
 
-			if (string.contains("p cnf ")) {
+			if (string.contains("p cnf ") && !string.startsWith("c ")) {
 				readmode = true;
 
 			}
 		}
-
-		/*
-		 * for (Or<Atom> or : op) { System.out.println(or); }
-		 */
-
 		CnfFormula finalcnf = new CnfFormula(op);
-		System.out.println(finalcnf.getClauses());
+		System.out.println(finalcnf.getVariables());
 		return finalcnf;
 
 	}
