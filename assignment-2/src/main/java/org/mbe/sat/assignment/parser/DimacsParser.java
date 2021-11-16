@@ -35,7 +35,7 @@ public class DimacsParser implements IFormulaParser<CnfFormula> {
 		Set<Or<Atom>> op = new HashSet<Or<Atom>>();
 		boolean readmode = false;
 		for (String string : formulaLines) {
-			if (readmode && !string.startsWith("c ")) {
+			if (readmode && !string.startsWith("c ") && !string.isEmpty() && string.matches(".*\\d.*")) {
 				String newstring = string.trim();
 				String[] splited = newstring.split("\\s+");
 				Set variablen = new HashSet<Formula>();
