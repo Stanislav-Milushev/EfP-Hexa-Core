@@ -31,7 +31,7 @@ public class DimacsParser implements IFormulaParser<CnfFormula> {
 
 	
 	@Override
-	public CnfFormula parse(List<String> formulaLines) throws IOException {
+	public CnfFormula parse(List<String> formulaLines) {
 		Set<Or<Atom>> op = new HashSet<Or<Atom>>();
 		boolean readmode = false;
 		for (String string : formulaLines) {
@@ -88,12 +88,6 @@ public class DimacsParser implements IFormulaParser<CnfFormula> {
 	@Override
 	public CnfFormula parse(InputStream inputStream) throws IOException {
 		return parse(inputStream, StandardCharsets.UTF_8);
-	}
-
-	@Override
-	public CnfFormula parse(File formulaFile) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

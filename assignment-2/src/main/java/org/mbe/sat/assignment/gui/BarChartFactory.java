@@ -32,7 +32,7 @@ public class BarChartFactory implements IBarChartFactory{
         this.chartGui=null;
         this.chartTitle=null;
     }
-
+    
     public void setChartTitle(String input) throws NullPointerException, EmptyChartInputException {
         if(input==null){
             throw new NullPointerException("title-input is null");
@@ -103,11 +103,16 @@ public class BarChartFactory implements IBarChartFactory{
     private void handleShowRequest(){
         if(this.namesProvided && this.categoriesProvided && this.valuesProvided && this.chartTitleProvided){
 
-            if(!(this.values.length==this.names.length)){
+//            if(!(this.values.length==this.names.length)){
+//                UserCommunication.errorDialog("INPUT-ERROR : ","The values- and names-input must have the same size!");
+//                return;
+//            }
+
+        	if(!(this.values.length==this.categories.length)){
                 UserCommunication.errorDialog("INPUT-ERROR : ","The values- and names-input must have the same size!");
                 return;
             }
-
+        	
             if(this.chartCount>0){
                 UserCommunication.errorDialog("DUPLICATE CHART ERROR : ", "A chart is already running");
                 return;
@@ -194,8 +199,9 @@ public class BarChartFactory implements IBarChartFactory{
         BarChartFactory factory=new BarChartFactory();
 
         String chartTitle="Benchmark-Comparison";
-        String[] names={"Trivial","Easy","Medium","No Pain. No Gain"};
-        String[] categories={"Runtime"};
+        //String[] names={"Trivial","Easy","Medium","No Pain. No Gain"};
+        String[] names={"Runtime"};
+        String[] categories={"Trivial","Easy","Medium","No Pain. No Gain"};
         double[] values={10.0, 42.0, 69.69, 420.0};
 
         try {
