@@ -29,22 +29,24 @@ public class BaseSolver implements ISolver<CnfFormula, Optional<Assignment>> {
         Set<Variable> variables = formula.getVariables();
         BooleanCombinator booleanCombinator = new BooleanCombinator(variables.size());
         Simplifier simplifier = new Simplifier();
-        
-        // Get boolean list with all possible boolean combinations 
-      
+              
         Assignment assignment = new Assignment();
         int numberOfCombinations = (int)Math.pow(2, variables.size());
         int index;
               
         for(int i = 0; i + 1 <= numberOfCombinations; i++ ) {
+        	
         	// Reset assignment and index
-        	boolean[] combination = booleanCombinator.getCombinationByBitIndex(i);
         	assignment = Assignment.empty();
         	index = 0;
         	
+        	// Get boolean combination by index
+        	boolean[] combination = booleanCombinator.getCombinationByBitIndex(i);
+        	
+        	
         	// Loop through the formula variables and set Boolean values depending on current combination
-        	for (Iterator<Variable> it = variables.iterator(); it.hasNext(); ) { Variable
-       		 	v = it.next(); 
+        	for (Iterator<Variable> it = variables.iterator(); it.hasNext(); ) { 
+        		Variable v = it.next(); 
         		assignment.setValue(v , combination[index]); 
        		 	index++;
         	}
