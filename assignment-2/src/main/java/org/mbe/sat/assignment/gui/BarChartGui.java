@@ -18,32 +18,101 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
+/**
+ * @author Darwin Brambor
+ *
+ */
 public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 	// values
 
+	/**
+	 * {@link IBarChartFactory} instance to handle requests of this gui
+	 */
 	private IBarChartFactory factory;
+	/**
+	 * title of this gui
+	 */
 	private String title;
+	/**
+	 * level of difficulty of this gui
+	 */
 	private String[] names;
+	/**
+	 * values of categories / benchmark files ; for each element of {@link #values}
+	 * one element of {@link #categories} is required
+	 */
 	private double[] values;
+	/**
+	 * names of categories / benchmark files ; for each element of {@link #values}
+	 * one element of {@link #categories} is required
+	 */
 	private String[] categories;
-	private final int MAX_NUMBER_OF_DATASETS = 8;
+	/**
+	 * maximum number of bars shown in the bar chart at a time
+	 */
+	private static final int MAX_NUMBER_OF_DATASETS = 8;
+	/**
+	 * pointer for the {@link #values} array and the {@link #categories} array to
+	 * show the next / previous {@value #MAX_NUMBER_OF_DATASETS} elements of the
+	 * arrays as bar chart
+	 */
 	private int pointer;
+
 	// components
 
-	// private JFreeChart prevChart;
+	/**
+	 * {@link JFreeChart} instance to display the next
+	 * {@value #MAX_NUMBER_OF_DATASETS} results
+	 */
 	private JFreeChart barChart;
 	// private JFreeChart nextChart;
 
+	/**
+	 * container panel ({@link ChartPanel}) for the {@link #barChart} instance
+	 */
 	private ChartPanel chartPanel;
+	/**
+	 * content pane of this gui ({@link JFrame} extension)
+	 */
 	private JPanel container;
+	/**
+	 * container panel ({@link JPanel}) for the control elements
+	 */
 	private JPanel subcontainer;
+	/**
+	 * {@link JButton} for sending an exit request to the {@link #factory} instance
+	 */
 	private JButton exitButton;
+	/**
+	 * {@link JButton} for sending an export request to the {@link #factory}
+	 * instance
+	 */
 	private JButton exportButton;
+	/**
+	 * {@link JButton} for displaying the next {@value #MAX_NUMBER_OF_DATASETS}
+	 * results in the {@link #barChart} (if available)
+	 */
 	private JButton nextButton;
+	/**
+	 * {@link JButton} for displaying the previous {@value #MAX_NUMBER_OF_DATASETS}
+	 * results in the {@link #barChart} (if available)
+	 */
 	private JButton prevButton;
 
+	/**
+	 * constructor ; receives
+	 * {@link #factory},{@link #title},{@link #values},{@link #names},{@link #categories}
+	 * and the {@link #pointer}
+	 * 
+	 * @param factory
+	 * @param chartTitle
+	 * @param values
+	 * @param names
+	 * @param categories
+	 */
 	public BarChartGui(IBarChartFactory factory, String chartTitle, double[] values, String[] names,
 			String[] categories) {
 		super("Statistics");
@@ -59,6 +128,10 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 		this.init();
 	}
 
+	/**
+	 * initializes all gui elements and adds all required {@link ActionListener}s
+	 * and {@link WindowListener}s
+	 */
 	private void init() {
 
 		// init components
@@ -140,15 +213,25 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 			}
 		});
 
-		
 	}
 
+	/**
+	 * updates the current {@link #barChart} instance to display the changed
+	 * (next/previous) elements according to the current {@link #pointer} value
+	 */
 	private void updateChart() {
 		barChart = ChartFactory.createBarChart(this.title, "Benchmark-File", "Time in Miliseconds", createDataset(),
 				PlotOrientation.VERTICAL, true, true, false);
 		chartPanel.setChart(barChart);
 	}
 
+	/**
+	 * provides the new input for the next {@link #barChart} instance
+	 * 
+	 * @return CategoryDataset : input for the new {@link #barChart} instance to
+	 *         display the changed (next/previous) elements according to the current
+	 *         {@link #pointer} value
+	 */
 	private CategoryDataset createDataset() {
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -173,7 +256,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 //            }
 //        }
 
-		for (int i = 0; i < this.MAX_NUMBER_OF_DATASETS; i++) {
+		for (int i = 0; i < MAX_NUMBER_OF_DATASETS; i++) {
 			if ((this.pointer + i) >= this.values.length) {
 				// this.pointer=0;
 				break;
@@ -183,16 +266,25 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 		return dataset;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void requestExport() {
 		factory.requestExport();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void requestExit() {
 		factory.requestExit();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void close() {
 		this.dispose();
 	}
