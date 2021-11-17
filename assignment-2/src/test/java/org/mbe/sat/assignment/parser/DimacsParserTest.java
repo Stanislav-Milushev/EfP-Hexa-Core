@@ -29,13 +29,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mbe.sat.core.model.formula.Atom;
 import org.mbe.sat.core.model.formula.CnfFormula;
+import org.mbe.sat.core.model.formula.Formula;
 import org.mbe.sat.core.model.formula.Literal;
 import org.mbe.sat.core.model.formula.Or;
 import org.mbe.sat.core.model.formula.Variable;
 import org.mbe.sat.core.problem.SatProblemFixtures;
 
 /**
- * @author Stan
+ * @author Darwin Brambor , Stanislav Milhusev
  *
  */
 class DimacsParserTest {
@@ -54,59 +55,74 @@ class DimacsParserTest {
 	void setUp() throws Exception {
 	}
 
-//	@Test
-//	void test() throws IOException {
-////		DimacsParser dp = new DimacsParser();
-////		File cnffile = new File(
-////				"src-framework/testFixtures/resources/org/mbe/sat/core/problem/" + "aim-50-1_6-yes1-4.cnf");
-////		CnfFormula formula = dp.parse(cnffile, StandardCharsets.UTF_8);
-//
-//	}
-
+	/**
+	 * 
+	 * testing of thrown exceptions after passing null input as file to the dimacs
+	 * parser
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	void emptyCnfInputTest() throws IOException {
 		DimacsParser dp = new DimacsParser();
 		File cnfFile = null;
-		// File cnfFile = new
-		// File("src-framework/testFixtures/resources/org/mbe/sat/core/problem/" +
-		// "aim-50-1_6-yes1-4.cnf");
-		// CnfFormula formula = dp.parse(cnfFile, StandardCharsets.UTF_8);
 		assertThrows(NullPointerException.class, () -> dp.parse(cnfFile, StandardCharsets.UTF_8));
 	}
-	
+
+	/**
+	 * testing of thrown exceptions after passing non existing file input to the
+	 * dimacs parser
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	void invalidFileTest() throws IOException {
 		DimacsParser dp = new DimacsParser();
 		File cnfFile = new File("");
-		boolean fileExists=cnfFile.exists();
+		boolean fileExists = cnfFile.exists();
 		assertThrows(IOException.class, () -> dp.parse(cnfFile, StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * Parameterized testing to test all available benchmark files as input for the
+	 * dimacs parser
+	 * 
+	 * @param filename
+	 * @throws IOException
+	 */
 	@ParameterizedTest
 	@MethodSource("dimacsFormulaMappingTestAllProvider")
 	void dimacsFormulaMappingTest(String filename) throws IOException {
 		DimacsParser dp = new DimacsParser();
-
-		//		File cnfFile = new File(
-//				"src-framework/testFixtures/resources/org/mbe/sat/core/problem/" + "aim-50-1_6-yes1-4.cnf");
-		
-		File cnfFile=new File(("src-framework/testFixtures/resources/org/mbe/sat/core/problem/"+filename));
-
-		//		boolean exists=cnfFile.exists();
-		
-		if(cnfFile.getName().contains("tutorial")) {
+		File cnfFile = new File(("src-framework/testFixtures/resources/org/mbe/sat/core/problem/" + filename));
+		if (cnfFile.getName().contains("tutorial")) {
 			return;
 		}
-		
+
 		CnfFormula formula = dp.parse(cnfFile, StandardCharsets.UTF_8);
 		assertTrue(mapDimacsFormula(cnfFile, formula));
 	}
-	
-	private static Stream<String> dimacsFormulaMappingTestAllProvider(){
-		return SatProblemFixtures.getAll().stream().map(model->model.getFileName());
+
+	/**
+	 * provider method for the {@link #dimacsFormulaMappingTest(String)} method
+	 * 
+	 * @return stream of all filenames of the benchmark files
+	 *
+	 */
+	private static Stream<String> dimacsFormulaMappingTestAllProvider() {
+		return SatProblemFixtures.getAll().stream().map(model -> model.getFileName());
 	}
-	
-	
+
+	/**
+	 * auxiliary method to indicate if all elements of the formula
+	 * {@link CnfFormula} are given inside the corresponding dimacs file
+	 * 
+	 * @param cnfFile
+	 * @param formula
+	 * @return true if all elements of the given forula are given inside the
+	 *         corresponding dimacs file
+	 * @throws IOException
+	 */
 	private static boolean mapDimacsFormula(File cnfFile, CnfFormula formula) throws IOException {
 		boolean result = true;
 
@@ -136,17 +152,17 @@ class DimacsParserTest {
 						intermediateResult = true;
 					}
 				}
-				
-				if(intermediateResult) {
-					String match="line : "+line+" | clause : "+clause;
+
+				if (intermediateResult) {
+					// String match="line : "+line+" | clause : "+clause;
 					break;
 				}
 			}
 
 			// if intermediate result is false at this point : no line has been found
 			// containing all literals of the current clause => therefore false is returned
-			if(!intermediateResult) {
-				result=false;
+			if (!intermediateResult) {
+				result = false;
 				break;
 			}
 		}
@@ -154,6 +170,11 @@ class DimacsParserTest {
 		return result;
 	}
 
+	/**
+	 * @param cnfFile
+	 * @return list of all lines as strings contained in the corresponding cnf-file
+	 * @throws IOException
+	 */
 	private static List<String> extract(File cnfFile) throws IOException {
 		return Files.lines(cnfFile.toPath()).map(s -> s.replace(" 0", "")).filter(s -> !s.contains("c"))
 				.filter(s -> !s.contains("p")).map(s -> s.trim()).collect(Collectors.toList());

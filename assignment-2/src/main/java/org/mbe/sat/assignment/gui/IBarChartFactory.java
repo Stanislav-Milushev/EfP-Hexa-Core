@@ -1,11 +1,26 @@
 package org.mbe.sat.assignment.gui;
 
+/**
+ * @author Darwin Brambor
+ *
+ */
 public interface IBarChartFactory {
 
-    public void requestExport();
+	/**
+	 * export the current results displayed by the corresponding
+	 * {@link IBarChartGui} instance into a specific format (not yet implemented)
+	 */
+	public void requestExport();
 
-    public void requestExit();
+	/**
+	 * exit the current program exectuion
+	 */
+	public void requestExit();
 
-    public void showGui();
+	/**
+	 * after all required data has been passed to the {@link IBarChartFactory} :
+	 * create/show {@link IBarChartGui}
+	 */
+	public void showGui();
 
 }
