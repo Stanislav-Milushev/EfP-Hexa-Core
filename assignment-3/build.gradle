@@ -1,0 +1,45 @@
+plugins {
+
+    // This Gradle is defined as a library. This way we can consume and expose dependencies using the keyword 'api'.
+    // Libraries defined in this module using the 'api' keyword are available to all dependent modules (modules that
+    // depend on 'assignment-2'
+    id 'java-library'
+    
+    // This plugin enables us to expose test classes as fixtures to other projects (next assignments)
+    // https://docs.gradle.org/current/userguide/java_testing.html#sec:java_test_fixtures
+    // In our case we mainly share the SAT problems along with the utility classes and abstract test class so that the
+    // solver implementations can be tested in each subsequent assignment
+    id 'java-test-fixtures'
+}
+
+group 'org.mbe.sat.assignment'
+version '1.0-SNAPSHOT'
+
+// This defines an additional Java source folder which contains solution for assignment 2
+sourceSets {
+    srcSolution2 {
+        main {
+            java {
+                srcDir 'src-solution-assignment-2/main/java'
+            }
+        }
+        test {
+            java {
+                srcDir 'src-solution-assignment-2/test/java'
+            }
+        }
+    }
+}
+
+// Defines from where all of the dependency below are downloaded
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    
+    // This assignment requires the datastructure for CNF formulas as well as
+    // the interfaces from assignment 2
+    api project(':assignment-2')
+    testImplementation(testFixtures(project(':assignment-2')))
+}
