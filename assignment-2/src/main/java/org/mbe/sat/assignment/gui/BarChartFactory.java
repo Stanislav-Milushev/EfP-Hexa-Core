@@ -202,9 +202,14 @@ public class BarChartFactory implements IBarChartFactory {
 //                return;
 //            }
 
-			if (!(this.values.length == this.categories.length)) {
-				UserCommunication.errorDialog("INPUT-ERROR : ", "The values- and names-input must have the same size!");
-				return;
+//			if (!(this.values.length == this.categories.length)) {
+//				UserCommunication.errorDialog("INPUT-ERROR : ", "The values- and names-input must have the same size!");
+//				return;
+//			}
+
+			if (this.values.length != (this.categories.length * this.names.length)) {
+				UserCommunication.errorDialog("INPUT-ERROR : ",
+						"The number of values must be the product of the category- and the names-length!");
 			}
 
 			if (this.chartCount > 0) {

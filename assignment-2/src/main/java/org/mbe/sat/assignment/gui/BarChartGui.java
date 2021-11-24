@@ -5,7 +5,9 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -53,19 +55,21 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * maximum number of bars shown in the bar chart at a time
 	 */
-	private static final int MAX_NUMBER_OF_DATASETS = 8;
+	private static final int BARS_PER_PAGE = 8;
 	/**
 	 * pointer for the {@link #values} array and the {@link #categories} array to
-	 * show the next / previous {@value #MAX_NUMBER_OF_DATASETS} elements of the
-	 * arrays as bar chart
+	 * show the next / previous {@value #BARS_PER_PAGE} elements of the arrays as
+	 * bar chart
 	 */
 	private int pointer;
+
+	private int numComparedInstances;
 
 	// components
 
 	/**
-	 * {@link JFreeChart} instance to display the next
-	 * {@value #MAX_NUMBER_OF_DATASETS} results
+	 * {@link JFreeChart} instance to display the next {@value #BARS_PER_PAGE}
+	 * results
 	 */
 	private JFreeChart barChart;
 	// private JFreeChart nextChart;
@@ -92,13 +96,13 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	 */
 	private JButton exportButton;
 	/**
-	 * {@link JButton} for displaying the next {@value #MAX_NUMBER_OF_DATASETS}
-	 * results in the {@link #barChart} (if available)
+	 * {@link JButton} for displaying the next {@value #BARS_PER_PAGE} results in
+	 * the {@link #barChart} (if available)
 	 */
 	private JButton nextButton;
 	/**
-	 * {@link JButton} for displaying the previous {@value #MAX_NUMBER_OF_DATASETS}
-	 * results in the {@link #barChart} (if available)
+	 * {@link JButton} for displaying the previous {@value #BARS_PER_PAGE} results
+	 * in the {@link #barChart} (if available)
 	 */
 	private JButton prevButton;
 
@@ -125,6 +129,8 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 		this.pointer = 0;
 
+		this.numComparedInstances = this.names.length;
+
 		this.init();
 	}
 
@@ -136,7 +142,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 		// init components
 
-		this.barChart = ChartFactory.createBarChart(this.title, "Benchmark-File", "Time in Miliseconds",
+		this.barChart = ChartFactory.createBarChart3D(this.title, "benchmark-files", "t in miliseconds",
 				createDataset(), PlotOrientation.VERTICAL, true, true, false);
 
 		this.chartPanel = new ChartPanel(this.barChart);
@@ -186,7 +192,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				pointer -= MAX_NUMBER_OF_DATASETS;
+				pointer -= BARS_PER_PAGE;
 				if (pointer <= 0) {
 					pointer = 0;
 				}
@@ -198,9 +204,9 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				pointer += MAX_NUMBER_OF_DATASETS;
-				if (pointer >= values.length) {
-					pointer -= MAX_NUMBER_OF_DATASETS;
+				pointer += BARS_PER_PAGE;
+				if (pointer >= categories.length) {
+					pointer -= BARS_PER_PAGE;
 				}
 				updateChart();
 			}
@@ -213,6 +219,20 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 			}
 		});
 
+//		CategoryPlot plot=this.barChart.getCategoryPlot();
+//		BarRenderer renderer=(BarRenderer)plot.getRenderer();
+//		renderer.setItemMargin(0.1);
+
+		this.setResizable(false);
+		
+		// customizations
+
+		// decrease space between bars of one category
+		((BarRenderer) this.barChart.getCategoryPlot().getRenderer()).setItemMargin(0.0);
+
+		// set font of heading
+		this.barChart.getTitle().setFont(new Font("Arial", Font.PLAIN, 25));
+		
 	}
 
 	/**
@@ -220,8 +240,17 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	 * (next/previous) elements according to the current {@link #pointer} value
 	 */
 	private void updateChart() {
-		barChart = ChartFactory.createBarChart(this.title, "Benchmark-File", "Time in Miliseconds", createDataset(),
+		barChart = ChartFactory.createBarChart3D(this.title, "benchmark-files", "t in miliseconds", createDataset(),
 				PlotOrientation.VERTICAL, true, true, false);
+
+		// customizations
+
+		// decrease space between bars of one category
+		((BarRenderer) this.barChart.getCategoryPlot().getRenderer()).setItemMargin(0.0);
+
+		// set font of heading
+		this.barChart.getTitle().setFont(new Font("Arial", Font.PLAIN, 25));
+
 		chartPanel.setChart(barChart);
 	}
 
@@ -256,13 +285,28 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 //            }
 //        }
 
-		for (int i = 0; i < MAX_NUMBER_OF_DATASETS; i++) {
-			if ((this.pointer + i) >= this.values.length) {
-				// this.pointer=0;
+//		for (int i = 0; i < BARS_PER_PAGE; i++) {
+//			if ((this.pointer + i) >= this.values.length) {
+//				// this.pointer=0;
+//				break;
+//			}
+//			dataset.addValue(this.values[this.pointer + i], this.names[0], this.categories[this.pointer + i]);
+//		}
+
+		int index = 0;
+		int nameCounter = 0;
+
+		for (int i = 0; i < BARS_PER_PAGE; i++) {
+			if ((this.pointer + i) >= this.categories.length) {
 				break;
 			}
-			dataset.addValue(this.values[this.pointer + i], this.names[0], this.categories[this.pointer + i]);
+
+			for (int j = 0; j < this.numComparedInstances; j++) {
+				dataset.addValue(this.values[index++], this.names[nameCounter++], this.categories[i + this.pointer]);
+				nameCounter %= this.names.length;
+			}
 		}
+
 		return dataset;
 	}
 
