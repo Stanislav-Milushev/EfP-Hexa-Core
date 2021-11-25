@@ -5,8 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -16,13 +21,17 @@ import org.mbe.sat.assignment.exceptions.EmptyChartInputException;
 import org.mbe.sat.assignment.gui.BarChartFactory;
 import org.mbe.sat.assignment.gui.IBarChartFactory;
 import org.mbe.sat.assignment.gui.IBarChartGui;
+import org.mbe.sat.assignment.gui.IInitDialogPanel;
+import org.mbe.sat.assignment.gui.InitDialogPanel;
 import org.mbe.sat.assignment.gui.ProgressBarGui;
+import org.mbe.sat.assignment.gui.UserCommunication;
 import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.problem.SatProblemFixtures;
 import org.mbe.sat.core.problem.SatProblemJsonModel;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner.TimedResult;
+import org.mbe.sat.impl.BaseSolver;
 
 /**
  * @author User Darwin Brambor
@@ -56,7 +65,10 @@ public class BenchmarkRunner {
 	 * specifies the number of round executed to obtain an average execution time
 	 */
 	private static int NUMBER_OF_RUNS;
-
+	
+	private static int timeout;
+	
+	
 	/**
 	 * constructor ; initializes
 	 * {@link #runner},{@link #factory},{@link #resultList}
@@ -104,27 +116,134 @@ public class BenchmarkRunner {
 			}
 		}
 
-		NUMBER_OF_RUNS = 1000;
-
+		///////////////////////////////
 		BenchmarkRunner runner = new BenchmarkRunner();
-//		runner.addSolver("1 : BASE SOLVER", new BaseSolver());
-		runner.addSolver("1 : DP-SOLVER", new DpSolver());
-		runner.addSolver("2 : DP-SOLVER", new DpSolver());
-		runner.addSolver("3 : DP-SOLVER", new DpSolver());
-		runner.addSolver("4 : DP-SOLVER", new DpSolver());
-
-		try {
-//			runner.runTrivial();
-			runner.runEasy();
-//			runner.runMedium();
-//			runner.runHard();
-//			runner.runInsane();
-		} catch (NullPointerException | EmptyChartInputException e) {
-			e.printStackTrace();
+		
+		//init-dialog
+		IInitDialogPanel panel=new InitDialogPanel();
+		while(true) {
+			JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK", JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.PLAIN_MESSAGE);
+			StringBuilder errorMessageBuilder=new StringBuilder("ERROR : \n");
+			
+			if(panel.validateNumberOfRuns()) {
+				if(panel.validateSelectedSolvers()) {
+					if(panel.validateTimeout()) {
+						
+						//all values received properly -> pass values to current benchmark configuration
+						NUMBER_OF_RUNS=panel.getNumberOfRuns();
+						
+						for(int i=0; i<panel.getSelectedSolvers().size(); i++) {
+							switch(panel.getSelectedSolvers().get(i)) {
+							case IInitDialogPanel.BASE_SOLVER_STRING:
+								runner.addSolver(i+1+" : Base-Solver", new BaseSolver());
+								break;
+							case IInitDialogPanel.DP_SOLVER_STRING:
+								runner.addSolver(i+1+" : Dp-Solver", new DpSolver());
+								break;
+							case IInitDialogPanel.SOLVER_3_STRING:
+								break;
+							case IInitDialogPanel.SOLVER_4_STRING:
+								break;
+							}
+						}
+						
+						timeout=panel.getTimeout();
+						
+						break;
+						
+					}
+				}
+			}
+			
+			if(!panel.validateNumberOfRuns()) {
+				errorMessageBuilder.append("The provided number of runs must be larger than 0!");
+				errorMessageBuilder.append("\n");
+			}
+			
+			if(!panel.validateSelectedSolvers()) {
+				errorMessageBuilder.append("At least one solver must be selected!");
+				errorMessageBuilder.append("\n");
+			}
+			
+			if(!panel.validateTimeout()) {
+				errorMessageBuilder.append("The provided timeout value must be larger than 0 minutes!");
+				errorMessageBuilder.append("\n");
+			}
+			
+			UserCommunication.errorDialog("INVALID INPUT", errorMessageBuilder.toString());
 		}
+	
+		switch (panel.getDifficulty()) {
+		case TRIVIAL:
+			try {
+				runner.runTrivial();
+			} catch (NullPointerException | EmptyChartInputException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+
+		case EASY:
+			try {
+				runner.runEasy();
+			} catch (NullPointerException | EmptyChartInputException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+			
+		case MEDIUM:
+			try {
+				runner.runMedium();
+			} catch (NullPointerException | EmptyChartInputException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+			
+		case HARD:
+			try {
+				runner.runHard();
+			} catch (NullPointerException | EmptyChartInputException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+			
+		case INSANE:
+			try {
+				runner.runInsane();
+			} catch (NullPointerException | EmptyChartInputException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+		}
+		
+//		try {
+////			runner.runTrivial();
+//			runner.runEasy();
+////			runner.runMedium();
+////			runner.runHard();
+////			runner.runInsane();
+//		} catch (NullPointerException | EmptyChartInputException e) {
+//			e.printStackTrace();
+//		}
+		///////////////////////////////
+		
+		//NUMBER_OF_RUNS = 1000;
+		
+//		runner.addSolver("1 : BASE SOLVER", new BaseSolver());
+//		runner.addSolver("1 : DP-SOLVER", new DpSolver());
+//		runner.addSolver("2 : DP-SOLVER", new DpSolver());
+//		runner.addSolver("3 : DP-SOLVER", new DpSolver());
+//		runner.addSolver("4 : DP-SOLVER", new DpSolver());
+
+		
 
 	}
-
+	
 	/**
 	 * performs setup for the {@link #runTrivial()} method by measuring the runtime
 	 * for all given {@link ISolver} instances ({@link #solverMap}) for a defined
@@ -164,10 +283,17 @@ public class BenchmarkRunner {
 
 				progressBarGui.setNewSolverValue(solverCounter++);
 				int runCounter = 0;
-
+				
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+					
+					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+						runCounter=0;
+						break;
+					}
+					
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -285,6 +411,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+
+					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+						break;
+					}
+					
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -402,6 +534,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+					
+					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+						break;
+					}
+					
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -519,6 +657,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+					
+					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+						break;
+					}
+					
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -636,6 +780,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+					
+					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+						break;
+					}
+					
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);

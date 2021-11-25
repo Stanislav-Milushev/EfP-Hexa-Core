@@ -224,7 +224,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 //		renderer.setItemMargin(0.1);
 
 		this.setResizable(false);
-		
+
 		// customizations
 
 		// decrease space between bars of one category
@@ -232,7 +232,6 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 		// set font of heading
 		this.barChart.getTitle().setFont(new Font("Arial", Font.PLAIN, 25));
-		
 	}
 
 	/**
