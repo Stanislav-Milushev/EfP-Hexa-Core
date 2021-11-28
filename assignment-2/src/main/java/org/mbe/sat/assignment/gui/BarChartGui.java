@@ -62,7 +62,9 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	 * bar chart
 	 */
 	private int pointer;
-
+	/**
+	 * number of compared instances for each {@link #categories category}
+	 */
 	private int numComparedInstances;
 
 	// components

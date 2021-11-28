@@ -8,19 +8,49 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.EmptyBorder;
 
+/**
+ * @author User Darwin Brambor
+ *
+ */
 public class ProgressBarGui extends JFrame {
 
 	private JPanel contentPane;
+	/**
+	 * displays the value of the current execution run/round
+	 */
 	private JProgressBar roundProgressBar;
+	/**
+	 * displays the value of the current {@link ISolver solver-instance}
+	 */
 	private JProgressBar solverProgressBar;
+	/**
+	 * displays the value of the current benchmark file
+	 */
 	private JProgressBar benchmarkProgressBar;
+	/**
+	 * displays the numeric value of the {@link #roundProgressBar}
+	 */
 	private JLabel roundProgressLabel;
+	/**
+	 * displays the numeric value of the {@link #solverProgressBar}
+	 */
 	private JLabel solverProgressLabel;
+	/**
+	 * displays the numeric value of the {@link #benchmarkProgressBar}
+	 */
 	private JLabel benchmarkProgressLabel;
 
-	// values
+	/**
+	 * max value for {@link #benchmarkProgressBar}
+	 */
 	private int maxNumBenchmarks;
+	/**
+	 * max value for {@link #solverProgressBar}
+	 */
 	private int maxNumSolvers;
+	/**
+	 * max value for {@link #roundProgressBar}
+	 */
 	private int maxNumRuns;
 
 //	/**
@@ -99,21 +129,33 @@ public class ProgressBarGui extends JFrame {
 		setVisible(true);
 	}
 
+	/**
+	 * @param newValue becomes the new value of {@link #roundProgressBar}
+	 */
 	public void setNewRoundValue(int newValue) {
 		this.roundProgressBar.setValue(newValue);
 		this.roundProgressLabel.setText((int) (this.roundProgressBar.getPercentComplete() * 100) + "%");
 	}
 
+	/**
+	 * @param newValue becomes the new value of {@link #benchmarkProgressBar}
+	 */
 	public void setNewBenchmarkValue(int newValue) {
 		this.benchmarkProgressBar.setValue(newValue);
 		this.benchmarkProgressLabel.setText((int) (this.benchmarkProgressBar.getPercentComplete() * 100) + "%");
 	}
 
+	/**
+	 * @param newValue becomes the new value of {@link #solverProgressBar}
+	 */
 	public void setNewSolverValue(int newValue) {
 		this.solverProgressBar.setValue(newValue);
 		this.solverProgressLabel.setText((int) (this.solverProgressBar.getPercentComplete() * 100) + "%");
 	}
 
+	/**
+	 * closes the gui
+	 */
 	public void close() {
 		this.dispose();
 	}

@@ -1,6 +1,8 @@
 package org.mbe.sat.assignment.benchmark_runner;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -65,10 +67,11 @@ public class BenchmarkRunner {
 	 * specifies the number of round executed to obtain an average execution time
 	 */
 	private static int NUMBER_OF_RUNS;
-	
+	/**
+	 * specifies the allowed timeout for one run
+	 */
 	private static int timeout;
-	
-	
+
 	/**
 	 * constructor ; initializes
 	 * {@link #runner},{@link #factory},{@link #resultList}
@@ -118,28 +121,29 @@ public class BenchmarkRunner {
 
 		///////////////////////////////
 		BenchmarkRunner runner = new BenchmarkRunner();
-		
-		//init-dialog
-		IInitDialogPanel panel=new InitDialogPanel();
-		while(true) {
+
+		// init-dialog
+		IInitDialogPanel panel = new InitDialogPanel();
+		while (true) {
 			JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK", JOptionPane.YES_NO_CANCEL_OPTION,
 					JOptionPane.PLAIN_MESSAGE);
-			StringBuilder errorMessageBuilder=new StringBuilder("ERROR : \n");
-			
-			if(panel.validateNumberOfRuns()) {
-				if(panel.validateSelectedSolvers()) {
-					if(panel.validateTimeout()) {
-						
-						//all values received properly -> pass values to current benchmark configuration
-						NUMBER_OF_RUNS=panel.getNumberOfRuns();
-						
-						for(int i=0; i<panel.getSelectedSolvers().size(); i++) {
-							switch(panel.getSelectedSolvers().get(i)) {
+			StringBuilder errorMessageBuilder = new StringBuilder("ERROR : \n");
+
+			if (panel.validateNumberOfRuns()) {
+				if (panel.validateSelectedSolvers()) {
+					if (panel.validateTimeout()) {
+
+						// all values received properly -> pass values to current benchmark
+						// configuration
+						NUMBER_OF_RUNS = panel.getNumberOfRuns();
+
+						for (int i = 0; i < panel.getSelectedSolvers().size(); i++) {
+							switch (panel.getSelectedSolvers().get(i)) {
 							case IInitDialogPanel.BASE_SOLVER_STRING:
-								runner.addSolver(i+1+" : Base-Solver", new BaseSolver());
+								runner.addSolver(i + 1 + " : Base-Solver", new BaseSolver());
 								break;
 							case IInitDialogPanel.DP_SOLVER_STRING:
-								runner.addSolver(i+1+" : Dp-Solver", new DpSolver());
+								runner.addSolver(i + 1 + " : Dp-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.SOLVER_3_STRING:
 								break;
@@ -147,33 +151,33 @@ public class BenchmarkRunner {
 								break;
 							}
 						}
-						
-						timeout=panel.getTimeout();
-						
+
+						timeout = panel.getTimeout();
+
 						break;
-						
+
 					}
 				}
 			}
-			
-			if(!panel.validateNumberOfRuns()) {
+
+			if (!panel.validateNumberOfRuns()) {
 				errorMessageBuilder.append("The provided number of runs must be larger than 0!");
 				errorMessageBuilder.append("\n");
 			}
-			
-			if(!panel.validateSelectedSolvers()) {
+
+			if (!panel.validateSelectedSolvers()) {
 				errorMessageBuilder.append("At least one solver must be selected!");
 				errorMessageBuilder.append("\n");
 			}
-			
-			if(!panel.validateTimeout()) {
+
+			if (!panel.validateTimeout()) {
 				errorMessageBuilder.append("The provided timeout value must be larger than 0 minutes!");
 				errorMessageBuilder.append("\n");
 			}
-			
+
 			UserCommunication.errorDialog("INVALID INPUT", errorMessageBuilder.toString());
 		}
-	
+
 		switch (panel.getDifficulty()) {
 		case TRIVIAL:
 			try {
@@ -192,7 +196,7 @@ public class BenchmarkRunner {
 				e1.printStackTrace();
 			}
 			break;
-			
+
 		case MEDIUM:
 			try {
 				runner.runMedium();
@@ -201,7 +205,7 @@ public class BenchmarkRunner {
 				e1.printStackTrace();
 			}
 			break;
-			
+
 		case HARD:
 			try {
 				runner.runHard();
@@ -210,7 +214,7 @@ public class BenchmarkRunner {
 				e1.printStackTrace();
 			}
 			break;
-			
+
 		case INSANE:
 			try {
 				runner.runInsane();
@@ -220,7 +224,7 @@ public class BenchmarkRunner {
 			}
 			break;
 		}
-		
+
 //		try {
 ////			runner.runTrivial();
 //			runner.runEasy();
@@ -231,19 +235,17 @@ public class BenchmarkRunner {
 //			e.printStackTrace();
 //		}
 		///////////////////////////////
-		
-		//NUMBER_OF_RUNS = 1000;
-		
+
+		// NUMBER_OF_RUNS = 1000;
+
 //		runner.addSolver("1 : BASE SOLVER", new BaseSolver());
 //		runner.addSolver("1 : DP-SOLVER", new DpSolver());
 //		runner.addSolver("2 : DP-SOLVER", new DpSolver());
 //		runner.addSolver("3 : DP-SOLVER", new DpSolver());
 //		runner.addSolver("4 : DP-SOLVER", new DpSolver());
 
-		
-
 	}
-	
+
 	/**
 	 * performs setup for the {@link #runTrivial()} method by measuring the runtime
 	 * for all given {@link ISolver} instances ({@link #solverMap}) for a defined
@@ -259,100 +261,99 @@ public class BenchmarkRunner {
 	 */
 	public void setupTrivial() throws NullPointerException, EmptyChartInputException {
 		// get/sort required benchmark files
-		this.jsonModels = SatProblemFixtures.getTrivial().stream()
-				.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-				.collect(Collectors.toList());
+				this.jsonModels = SatProblemFixtures.getTrivial().stream()
+						.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.collect(Collectors.toList());
 
 		//////////////////////////////
-		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
+				ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
 		//////////////////////////////
-		int modelCounter = 0;
+				int modelCounter = 0;
 
-		// measure runtime of each retrieved json-model / contained cnf-formula
-		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-			CnfFormula formula = jsonModel.getFormula();
+				// measure runtime of each retrieved json-model / contained cnf-formula
+				for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
+					SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
+					CnfFormula formula = jsonModel.getFormula();
 
-			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
+					progressBarGui.setNewBenchmarkValue(modelCounter++);
+					int solverCounter = 0;
 
-			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-				String solverName = (String) solverIterator.next();
-				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
+					for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
+						String solverName = (String) solverIterator.next();
+						ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
+						ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
 
-				progressBarGui.setNewSolverValue(solverCounter++);
-				int runCounter = 0;
-				
-				// capture runtimes for given number of rounds
-				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-					
-					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
-						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-						runCounter=0;
-						break;
+						progressBarGui.setNewSolverValue(solverCounter++);
+						int runCounter = 0;
+
+						// capture runtimes for given number of rounds
+						for (int i = 0; i < NUMBER_OF_RUNS; i++) {
+							TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+
+							if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
+								intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
+								break;
+							}
+
+							intermediateResultList.add(timedResult);
+
+							progressBarGui.setNewRoundValue(runCounter++);
+						}
+
+						long sumDuration = 0;
+
+						for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
+								.iterator(); resultListIterator.hasNext();) {
+							TimedResult<Optional<Assignment>> result = resultListIterator.next();
+							sumDuration += result.getDurationInMilliseconds();
+						}
+
+						// calculate average runtime
+						long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
+						// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
+
+						TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
+								intermediateResultList.get(0).getResult(), finalDuration);
+						this.resultList.add(finalResult);
 					}
-					
-					intermediateResultList.add(timedResult);
-
-					progressBarGui.setNewRoundValue(runCounter++);
 				}
 
-				long sumDuration = 0;
+				// prepare parameters for BarChartFactory
+				double[] values = new double[this.resultList.size()];
+				String[] names = new String[this.solverMap.size()];
+				String[] categories = new String[this.jsonModels.size()];
 
-				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
-						.iterator(); resultListIterator.hasNext();) {
-					TimedResult<Optional<Assignment>> result = resultListIterator.next();
-					sumDuration += result.getDurationInMilliseconds();
+				int counter = 0;
+				for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
+					String solverName = (String) solverIterator.next();
+					names[counter++] = solverName;
 				}
 
-				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
-				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
+				counter = 0;
+				for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
+					SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
+					StringBuilder builder = new StringBuilder();
+					builder.append(model.getFileName());
+					builder.append(" | ");
+					builder.append("VARIABLES : ");
+					builder.append(model.getFormula().getVariables().size());
+					categories[counter++] = builder.toString();
+				}
 
-				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
-						intermediateResultList.get(0).getResult(), finalDuration);
-				this.resultList.add(finalResult);
-			}
-		}
+				counter = 0;
+				for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
+						.hasNext();) {
+					TimedResult<Optional<Assignment>> result = resultIterator.next();
+					values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
+				}
 
-		// prepare parameters for BarChartFactory
-		double[] values = new double[this.resultList.size()];
-		String[] names = new String[this.solverMap.size()];
-		String[] categories = new String[this.jsonModels.size()];
+				// pass parameters to BarChartFactory
+				this.factory.setChartTitle("Easy Benchmark : " + NUMBER_OF_RUNS + " runs");
+				this.factory.setNames(names);
+				this.factory.setCategories(categories);
+				this.factory.setValues(values);
 
-		int counter = 0;
-		for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-			String solverName = (String) solverIterator.next();
-			names[counter++] = solverName;
-		}
-
-		counter = 0;
-		for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
-			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
-			StringBuilder builder = new StringBuilder();
-			builder.append(model.getFileName());
-			builder.append(" | ");
-			builder.append("VARIABLES : ");
-			builder.append(model.getFormula().getVariables().size());
-			categories[counter++] = builder.toString();
-		}
-
-		counter = 0;
-		for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
-				.hasNext();) {
-			TimedResult<Optional<Assignment>> result = resultIterator.next();
-			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
-		}
-
-		// pass parameters to BarChartFactory
-		this.factory.setChartTitle("Trivial Benchmark : " + NUMBER_OF_RUNS + " runs");
-		this.factory.setNames(names);
-		this.factory.setCategories(categories);
-		this.factory.setValues(values);
-
-		progressBarGui.close();
+				progressBarGui.close();
 	}
 
 	/**
@@ -405,6 +406,71 @@ public class BenchmarkRunner {
 				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
 				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
 
+//				/////////////////////////////////////////////////////////////////////////
+//				
+//				Thread t = new Thread() {
+//					private TimedResult<Optional<Assignment>> timedResult;
+//					private TimedCnfSolvableRunner runner;
+//					private ISolver<CnfFormula, Optional<Assignment>> solver;
+//					private CnfFormula formula;
+//					private boolean runnerValid = false;
+//					private boolean solverValid = false;
+//					private boolean formulaValid = false;
+//
+//					@Override
+//					public void run() {
+//						if (validate()) {
+//							timedResult = runner.runTimed(solver, formula);
+//						}
+//						interrupt();
+//					}
+//
+//					public TimedResult<Optional<Assignment>> getTimedResult() {
+//						if(this.timedResult==null) {
+//							return new TimedResult<Optional<Assignment>>(Optional.empty(),0);
+//						}
+//						return this.timedResult;
+//					}
+//
+//					public void setRunner(TimedCnfSolvableRunner runner) {
+//						if (runner != null) {
+//							this.runner = runner;
+//							this.runnerValid = true;
+//						}
+//					}
+//
+//					public void setSolver(ISolver<CnfFormula, Optional<Assignment>> solver) {
+//						if (solver != null) {
+//							this.solver = solver;
+//							this.solverValid = true;
+//						}
+//					}
+//
+//					public void setFormula(CnfFormula formula) {
+//						if (formula != null) {
+//							this.formula = formula;
+//							this.formulaValid = true;
+//						}
+//					}
+//
+//					public boolean validate() {
+//						return (this.runnerValid && this.formulaValid && this.solverValid);
+//					}
+//				};
+//
+//				//setup thread
+//				try {
+//					t.getClass().getMethod("setSolver",ISolver.class).invoke(t, currentSolver);
+//					t.getClass().getMethod("setFormula",CnfFormula.class).invoke(t, formula);
+//					t.getClass().getMethod("setRunner",TimedCnfSolvableRunner.class).invoke(t, this.runner);
+//				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+//						| NoSuchMethodException | SecurityException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//				
+//				///////////////////////////////////////////////////					
+				
 				progressBarGui.setNewSolverValue(solverCounter++);
 				int runCounter = 0;
 
@@ -412,11 +478,11 @@ public class BenchmarkRunner {
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
 
-					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
 						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
 						break;
 					}
-					
+
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -534,12 +600,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-					
-					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+
+					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
 						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
 						break;
 					}
-					
+
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -657,12 +723,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-					
-					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+
+					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
 						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
 						break;
 					}
-					
+
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);
@@ -780,12 +846,12 @@ public class BenchmarkRunner {
 				// capture runtimes for given number of rounds
 				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
 					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-					
-					if(timedResult.getDurationInMilliseconds()>=(timeout*60*1000)) {
+
+					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
 						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
 						break;
 					}
-					
+
 					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRoundValue(runCounter++);

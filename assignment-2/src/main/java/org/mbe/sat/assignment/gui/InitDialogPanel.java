@@ -18,6 +18,8 @@ import javax.swing.SwingConstants;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import org.mbe.sat.assignment.gui.InitDialogPanel.Difficulty;
+import org.mbe.sat.assignment.solver.BaseSolver;
+
 import javax.swing.JCheckBox;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JSlider;
@@ -27,29 +29,90 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.awt.Dimension;
 
+/**
+ * @author User Darwin Brambor
+ *
+ */
 public class InitDialogPanel extends JPanel implements IInitDialogPanel {
+	/**
+	 * timeout label
+	 */
 	private JLabel timeoutValueLabel;
+	/**
+	 * run value label
+	 */
 	private JLabel runValueLabel;
+	/**
+	 * can be changed by the user to specify the timeout for the current benchmark
+	 */
 	private JSlider timeoutSlider;
+	/**
+	 * can be changed by the user to specify the timeout for the current benchmark
+	 */
 	private JSlider runSlider;
+	/**
+	 * enables the user to select from all available {@link Difficulty difficulties}
+	 */
 	private JComboBox difficultyCombobox;
+	/**
+	 * enables the user to include the {@link BaseSolver base-solver} in the current
+	 * benchmark if selected
+	 */
 	private JCheckBox baseCheckbox;
+	/**
+	 * enables the user to include the DP-solver in the current benchmark if
+	 * selected
+	 */
 	private JCheckBox dpCheckbox;
+	/**
+	 * placeholder
+	 */
 	private JCheckBox solver3Checkbox;
+	/**
+	 * placeholder
+	 */
 	private JCheckBox solver4Checkbox;
 
+	/**
+	 * {@link Difficulty difficulty} selected by the user
+	 */
 	private Difficulty diff;
+	/**
+	 * boolean value corresponds to the current selection state of
+	 * {@link #baseCheckbox}
+	 */
 	private boolean baseSolverSelected;
+	/**
+	 * boolean value corresponds to the current selection state of
+	 * {@link #dpCheckbox}
+	 */
 	private boolean dpSolverSelected;
+	/**
+	 * boolean value corresponds to the current selection state of
+	 * {@link #solver3Checkbox}
+	 */
 	private boolean solver3Selected;
+	/**
+	 * boolean value corresponds to the current selection state of
+	 * {@link #solver4Checkbox}
+	 */
 	private boolean solver4Selected;
+	/**
+	 * number of runs selected by the user using {@link #runSlider}
+	 */
 	private int numberOfRuns;
+	/**
+	 * timeout selected by the user using {@link #timeoutSlider}
+	 */
 	private int timeout;
-	
+
 	public enum Difficulty {
 		TRIVIAL, EASY, MEDIUM, HARD, INSANE
 	}
 
+	/**
+	 * Initializes all relevant values
+	 */
 	private void initValues() {
 		this.diff = Difficulty.TRIVIAL;
 		this.baseSolverSelected = this.baseCheckbox.isSelected();
@@ -199,11 +262,17 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Difficulty getDifficulty() {
 		return this.diff;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<String> getSelectedSolvers() {
 		List<String> resultList = new ArrayList<>();
@@ -227,35 +296,50 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		return resultList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getNumberOfRuns() {
 		return this.numberOfRuns;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean validateSelectedSolvers() {
-		if(this.getSelectedSolvers().size()==0) {
+		if (this.getSelectedSolvers().size() == 0) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean validateNumberOfRuns() {
-		if(this.numberOfRuns==0) {
+		if (this.numberOfRuns == 0) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean validateTimeout() {
-		if(this.timeout==0) {
+		if (this.timeout == 0) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getTimeout() {
 		return this.timeout;
