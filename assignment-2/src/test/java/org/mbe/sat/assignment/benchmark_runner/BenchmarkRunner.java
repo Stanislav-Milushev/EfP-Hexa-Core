@@ -92,10 +92,10 @@ public class BenchmarkRunner {
 			// runner.runHard(new BaseSolver());
 			// runner.runInsane(new BaseSolver());
 		} catch (NullPointerException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (EmptyChartInputException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

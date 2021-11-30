@@ -132,7 +132,7 @@ public class ProgressBarGui extends JFrame {
 	/**
 	 * @param newValue becomes the new value of {@link #roundProgressBar}
 	 */
-	public void setNewRoundValue(int newValue) {
+	public void setNewRunValue(int newValue) {
 		this.roundProgressBar.setValue(newValue);
 		this.roundProgressLabel.setText((int) (this.roundProgressBar.getPercentComplete() * 100) + "%");
 	}

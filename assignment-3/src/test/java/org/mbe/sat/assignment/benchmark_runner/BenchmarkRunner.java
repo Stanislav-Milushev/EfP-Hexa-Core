@@ -25,20 +25,83 @@ import org.mbe.sat.assignment.gui.IBarChartFactory;
 import org.mbe.sat.assignment.gui.IBarChartGui;
 import org.mbe.sat.assignment.gui.IInitDialogPanel;
 import org.mbe.sat.assignment.gui.InitDialogPanel;
+import org.mbe.sat.assignment.gui.InitDialogPanel.Difficulty;
 import org.mbe.sat.assignment.gui.ProgressBarGui;
 import org.mbe.sat.assignment.gui.UserCommunication;
+import org.mbe.sat.assignment.solver.BaseSolver;
 import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.problem.SatProblemFixtures;
 import org.mbe.sat.core.problem.SatProblemJsonModel;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner.TimedResult;
-import org.mbe.sat.impl.BaseSolver;
 
 /**
  * @author User Darwin Brambor
  *
  */
+
+class SolverRunnable implements Runnable {
+
+	private TimedResult<Optional<Assignment>> timedResult;
+	private TimedCnfSolvableRunner runner;
+	private ISolver<CnfFormula, Optional<Assignment>> solver;
+	private CnfFormula formula;
+	private boolean runnerValid = false;
+	private boolean solverValid = false;
+	private boolean formulaValid = false;
+	private boolean finished = false;
+
+	@Override
+	public void run() {
+		if (validate()) {
+			timedResult = runner.runTimed(solver, formula);
+		}
+		// this.finished=true;
+	}
+
+	public TimedResult<Optional<Assignment>> getTimedResult() {
+		if (this.timedResult == null) {
+			return new TimedResult<Optional<Assignment>>(Optional.empty(), 0);
+		}
+		return this.timedResult;
+	}
+
+	public void setRunner(TimedCnfSolvableRunner runner) {
+		if (runner != null) {
+			this.runner = runner;
+			this.runnerValid = true;
+		}
+	}
+
+	public void setSolver(ISolver<CnfFormula, Optional<Assignment>> solver) {
+		if (solver != null) {
+			this.solver = solver;
+			this.solverValid = true;
+		}
+	}
+
+	public void setFormula(CnfFormula formula) {
+		if (formula != null) {
+			this.formula = formula;
+			this.formulaValid = true;
+		}
+	}
+
+	public boolean validate() {
+		return (this.runnerValid && this.formulaValid && this.solverValid);
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void terminate(boolean choice) {
+		this.solver.terminate(choice);
+	}
+
+}
+
 public class BenchmarkRunner {
 
 	/**
@@ -63,14 +126,21 @@ public class BenchmarkRunner {
 	 * key
 	 */
 	private TreeMap<String, ISolver<CnfFormula, Optional<Assignment>>> solverMap;
+
+	public void setNumberOfRuns(int numberOfRuns) {
+		this.numberOfRuns = numberOfRuns;
+	}
+
 	/**
 	 * specifies the number of round executed to obtain an average execution time
 	 */
-	private static int NUMBER_OF_RUNS;
+	private int numberOfRuns;
 	/**
 	 * specifies the allowed timeout for one run
 	 */
-	private static int timeout;
+	private int timeout;
+
+	private Difficulty difficulty;
 
 	/**
 	 * constructor ; initializes
@@ -94,6 +164,33 @@ public class BenchmarkRunner {
 	 */
 	public boolean addSolver(String solverName, ISolver<CnfFormula, Optional<Assignment>> newSolver) {
 		return this.solverMap.put(solverName, newSolver) == null;
+	}
+
+	/**
+	 * Sets the {@link #timeout} value of the benchmark
+	 * 
+	 * @param timeout
+	 */
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
+	/**
+	 * returns the user-selected difficulty of the benchmark
+	 * 
+	 * @return benchmark {@link Difficulty difficulty}
+	 */
+	public Difficulty getDifficulty() {
+		return difficulty;
+	}
+
+	/**
+	 * sets the new user-selected difficulty of the benchmark
+	 * 
+	 * @param new benchmark {@link Difficulty difficulty}
+	 */
+	public void setDifficulty(Difficulty difficulty) {
+		this.difficulty = difficulty;
 	}
 
 	public static void main(String[] args) {
@@ -135,7 +232,7 @@ public class BenchmarkRunner {
 
 						// all values received properly -> pass values to current benchmark
 						// configuration
-						NUMBER_OF_RUNS = panel.getNumberOfRuns();
+						runner.setNumberOfRuns(panel.getNumberOfRuns());
 
 						for (int i = 0; i < panel.getSelectedSolvers().size(); i++) {
 							switch (panel.getSelectedSolvers().get(i)) {
@@ -152,10 +249,10 @@ public class BenchmarkRunner {
 							}
 						}
 
-						timeout = panel.getTimeout();
+						runner.setTimeout(panel.getTimeout());
+						runner.setDifficulty(panel.getDifficulty());
 
 						break;
-
 					}
 				}
 			}
@@ -178,314 +275,159 @@ public class BenchmarkRunner {
 			UserCommunication.errorDialog("INVALID INPUT", errorMessageBuilder.toString());
 		}
 
-		switch (panel.getDifficulty()) {
+		try {
+			runner.runBenchmark();
+		} catch (NullPointerException | EmptyChartInputException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui() showGui}
+	 * ({@link IBarChartFactory}) after the benchmark setup was successful was
+	 * successful ({@link #setup() setup})
+	 * 
+	 * @throws NullPointerException     (error in {@link #setup() setup})
+	 * @throws EmptyChartInputException (error in {@link #setup() setup})
+	 */
+	public void runBenchmark() throws NullPointerException, EmptyChartInputException {
+		this.setup();
+		this.factory.showGui();
+	}
+
+	public void setup() throws NullPointerException, EmptyChartInputException {
+		String benchmarkType = null;
+
+		switch (this.difficulty) {
 		case TRIVIAL:
-			try {
-				runner.runTrivial();
-			} catch (NullPointerException | EmptyChartInputException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// get/sort required benchmark files
+			this.jsonModels = SatProblemFixtures.getTrivial().stream()
+					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+					.collect(Collectors.toList());
+			benchmarkType = "TRIVIAL";
 			break;
 
 		case EASY:
-			try {
-				runner.runEasy();
-			} catch (NullPointerException | EmptyChartInputException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// get/sort required benchmark files
+			this.jsonModels = SatProblemFixtures.getEasy().stream()
+					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+					.collect(Collectors.toList());
+			benchmarkType = "EASY";
 			break;
 
 		case MEDIUM:
-			try {
-				runner.runMedium();
-			} catch (NullPointerException | EmptyChartInputException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// get/sort required benchmark files
+			this.jsonModels = SatProblemFixtures.getMedium().stream()
+					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+					.collect(Collectors.toList());
+			benchmarkType = "MEDIUM";
 			break;
 
 		case HARD:
-			try {
-				runner.runHard();
-			} catch (NullPointerException | EmptyChartInputException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// get/sort required benchmark files
+			this.jsonModels = SatProblemFixtures.getHard().stream()
+					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+					.collect(Collectors.toList());
+			benchmarkType = "HARD";
 			break;
 
 		case INSANE:
-			try {
-				runner.runInsane();
-			} catch (NullPointerException | EmptyChartInputException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// get/sort required benchmark files
+			this.jsonModels = SatProblemFixtures.getInsane().stream()
+					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+					.collect(Collectors.toList());
+			benchmarkType = "INSANE";
 			break;
 		}
 
-//		try {
-////			runner.runTrivial();
-//			runner.runEasy();
-////			runner.runMedium();
-////			runner.runHard();
-////			runner.runInsane();
-//		} catch (NullPointerException | EmptyChartInputException e) {
-//			e.printStackTrace();
-//		}
-		///////////////////////////////
-
-		// NUMBER_OF_RUNS = 1000;
-
-//		runner.addSolver("1 : BASE SOLVER", new BaseSolver());
-//		runner.addSolver("1 : DP-SOLVER", new DpSolver());
-//		runner.addSolver("2 : DP-SOLVER", new DpSolver());
-//		runner.addSolver("3 : DP-SOLVER", new DpSolver());
-//		runner.addSolver("4 : DP-SOLVER", new DpSolver());
-
-	}
-
-	/**
-	 * performs setup for the {@link #runTrivial()} method by measuring the runtime
-	 * for all given {@link ISolver} instances ({@link #solverMap}) for a defined
-	 * number of repetitions (defined by {@link #NUMBER_OF_RUNS} :
-	 * {@value #NUMBER_OF_RUNS}) to calculate the average runtime of each given
-	 * benchmark file for the difficulty "TRIVIAL". Finally all generated values are
-	 * passed to the {@link IBarChartFactory} instance ({@link #factory})
-	 * 
-	 * @throws NullPointerException     (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 * @throws EmptyChartInputException (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 */
-	public void setupTrivial() throws NullPointerException, EmptyChartInputException {
-		// get/sort required benchmark files
-				this.jsonModels = SatProblemFixtures.getTrivial().stream()
-						.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-						.collect(Collectors.toList());
-
 		//////////////////////////////
-				ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
+		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), numberOfRuns);
 		//////////////////////////////
-				int modelCounter = 0;
+		int modelCounter = 0;
 
-				// measure runtime of each retrieved json-model / contained cnf-formula
-				for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-					SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-					CnfFormula formula = jsonModel.getFormula();
+		// measure runtime of each retrieved json-model / contained cnf-formula
+		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
+			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
+			CnfFormula formula = jsonModel.getFormula();
 
-					progressBarGui.setNewBenchmarkValue(modelCounter++);
-					int solverCounter = 0;
+			progressBarGui.setNewBenchmarkValue(modelCounter++);
+			int solverCounter = 0;
+			boolean timeoutDue = false;
 
-					for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-						String solverName = (String) solverIterator.next();
-						ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-						ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
+			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
+				timeoutDue = false;
+				progressBarGui.setNewSolverValue(solverCounter++);
 
-						progressBarGui.setNewSolverValue(solverCounter++);
-						int runCounter = 0;
+				String solverName = (String) solverIterator.next();
+				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
+				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
 
-						// capture runtimes for given number of rounds
-						for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-							TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
+				int runCounter = 1;
+				progressBarGui.setNewRunValue(runCounter);
 
-							if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
-								intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-								break;
-							}
+				SolverRunnable runnable = null;
+				Thread thread = null;
 
-							intermediateResultList.add(timedResult);
+				// capture runtimes for given number of rounds
+				for (int i = 0; i < numberOfRuns; i++) {
+					TimedResult<Optional<Assignment>> timedResult = null;
+					TimedCnfSolvableRunner timedRunner = new TimedCnfSolvableRunner();
 
-							progressBarGui.setNewRoundValue(runCounter++);
+					// setup runnable thread
+					currentSolver.terminate(false);
+					runnable = new SolverRunnable();
+					runnable.setFormula(formula);
+					runnable.setSolver(currentSolver);
+					runnable.setRunner(timedRunner);
+					// runnable.setRunner(this.runner);
+					thread = new Thread(runnable);
+
+					thread.start();
+					long timestamp = System.currentTimeMillis();
+
+					while (true) {
+						if ((System.currentTimeMillis() - timestamp) > (timeout * 60 * 1000)) {
+							timeoutDue = true;
+							break;
 						}
 
-						long sumDuration = 0;
-
-						for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
-								.iterator(); resultListIterator.hasNext();) {
-							TimedResult<Optional<Assignment>> result = resultListIterator.next();
-							sumDuration += result.getDurationInMilliseconds();
+						if (!thread.isAlive()) {
+							System.out.println("Thread not alive");
+							break;
 						}
-
-						// calculate average runtime
-						long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
-						// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
-
-						TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
-								intermediateResultList.get(0).getResult(), finalDuration);
-						this.resultList.add(finalResult);
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
-				}
 
-				// prepare parameters for BarChartFactory
-				double[] values = new double[this.resultList.size()];
-				String[] names = new String[this.solverMap.size()];
-				String[] categories = new String[this.jsonModels.size()];
+					runnable.terminate(true);
+					try {
+						thread.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
-				int counter = 0;
-				for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-					String solverName = (String) solverIterator.next();
-					names[counter++] = solverName;
-				}
-
-				counter = 0;
-				for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
-					SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
-					StringBuilder builder = new StringBuilder();
-					builder.append(model.getFileName());
-					builder.append(" | ");
-					builder.append("VARIABLES : ");
-					builder.append(model.getFormula().getVariables().size());
-					categories[counter++] = builder.toString();
-				}
-
-				counter = 0;
-				for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
-						.hasNext();) {
-					TimedResult<Optional<Assignment>> result = resultIterator.next();
-					values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
-				}
-
-				// pass parameters to BarChartFactory
-				this.factory.setChartTitle("Easy Benchmark : " + NUMBER_OF_RUNS + " runs");
-				this.factory.setNames(names);
-				this.factory.setCategories(categories);
-				this.factory.setValues(values);
-
-				progressBarGui.close();
-	}
-
-	/**
-	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui()}
-	 * ({@link IBarChartFactory}) after trivial setup was successful
-	 * ({@link #setupTrivial()})
-	 * 
-	 * @throws NullPointerException     (error in {@link #setupTrivial()})
-	 * @throws EmptyChartInputException (error in {@link #setupTrivial()})
-	 */
-	public void runTrivial() throws NullPointerException, EmptyChartInputException {
-		this.setupTrivial();
-		this.factory.showGui();
-	}
-
-	/**
-	 * performs setup for the {@link #runEasy()} method by measuring the runtime for
-	 * all given {@link ISolver} instances ({@link #solverMap}) for a defined number
-	 * of repetitions (defined by {@link #NUMBER_OF_RUNS} :
-	 * {@value #NUMBER_OF_RUNS}) to calculate the average runtime of each given
-	 * benchmark file for the difficulty "EASY". Finally all generated values are
-	 * passed to the {@link IBarChartFactory} instance ({@link #factory})
-	 * 
-	 * @throws NullPointerException     (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 * @throws EmptyChartInputException (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 */
-	public void setupEasy() throws NullPointerException, EmptyChartInputException {
-		// get/sort required benchmark files
-		this.jsonModels = SatProblemFixtures.getEasy().stream()
-				.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-				.collect(Collectors.toList());
-
-//////////////////////////////
-		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
-//////////////////////////////
-		int modelCounter = 0;
-
-		// measure runtime of each retrieved json-model / contained cnf-formula
-		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-			CnfFormula formula = jsonModel.getFormula();
-
-			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
-
-			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-				String solverName = (String) solverIterator.next();
-				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
-
-//				/////////////////////////////////////////////////////////////////////////
-//				
-//				Thread t = new Thread() {
-//					private TimedResult<Optional<Assignment>> timedResult;
-//					private TimedCnfSolvableRunner runner;
-//					private ISolver<CnfFormula, Optional<Assignment>> solver;
-//					private CnfFormula formula;
-//					private boolean runnerValid = false;
-//					private boolean solverValid = false;
-//					private boolean formulaValid = false;
-//
-//					@Override
-//					public void run() {
-//						if (validate()) {
-//							timedResult = runner.runTimed(solver, formula);
-//						}
-//						interrupt();
-//					}
-//
-//					public TimedResult<Optional<Assignment>> getTimedResult() {
-//						if(this.timedResult==null) {
-//							return new TimedResult<Optional<Assignment>>(Optional.empty(),0);
-//						}
-//						return this.timedResult;
-//					}
-//
-//					public void setRunner(TimedCnfSolvableRunner runner) {
-//						if (runner != null) {
-//							this.runner = runner;
-//							this.runnerValid = true;
-//						}
-//					}
-//
-//					public void setSolver(ISolver<CnfFormula, Optional<Assignment>> solver) {
-//						if (solver != null) {
-//							this.solver = solver;
-//							this.solverValid = true;
-//						}
-//					}
-//
-//					public void setFormula(CnfFormula formula) {
-//						if (formula != null) {
-//							this.formula = formula;
-//							this.formulaValid = true;
-//						}
-//					}
-//
-//					public boolean validate() {
-//						return (this.runnerValid && this.formulaValid && this.solverValid);
-//					}
-//				};
-//
-//				//setup thread
-//				try {
-//					t.getClass().getMethod("setSolver",ISolver.class).invoke(t, currentSolver);
-//					t.getClass().getMethod("setFormula",CnfFormula.class).invoke(t, formula);
-//					t.getClass().getMethod("setRunner",TimedCnfSolvableRunner.class).invoke(t, this.runner);
-//				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-//						| NoSuchMethodException | SecurityException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//				
-//				///////////////////////////////////////////////////					
-				
-				progressBarGui.setNewSolverValue(solverCounter++);
-				int runCounter = 0;
-
-				// capture runtimes for given number of rounds
-				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-
-					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
-						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-						break;
+					timedResult = runnable.getTimedResult();
+					if (timeoutDue) {
+						timedResult = new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0);
+						runCounter = 1;
 					}
 
 					intermediateResultList.add(timedResult);
 
-					progressBarGui.setNewRoundValue(runCounter++);
+					progressBarGui.setNewRunValue(runCounter);
+
+					if (timeoutDue) {
+						currentSolver.terminate(false);
+						break;
+					}
+					runCounter++;
 				}
 
 				long sumDuration = 0;
@@ -497,7 +439,7 @@ public class BenchmarkRunner {
 				}
 
 				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
+				long finalDuration = ((sumDuration * 1000000) / (numberOfRuns));
 				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
 
 				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
@@ -536,393 +478,11 @@ public class BenchmarkRunner {
 		}
 
 		// pass parameters to BarChartFactory
-		this.factory.setChartTitle("Easy Benchmark : " + NUMBER_OF_RUNS + " runs");
+		this.factory.setChartTitle(benchmarkType + " Benchmark : " + numberOfRuns + " runs");
 		this.factory.setNames(names);
 		this.factory.setCategories(categories);
 		this.factory.setValues(values);
 
 		progressBarGui.close();
-	}
-
-	/**
-	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui()}
-	 * ({@link IBarChartFactory}) after easy setup was successful
-	 * ({@link #setupEasy()})
-	 * 
-	 * @throws NullPointerException     (error in {@link #setupEasy()})
-	 * @throws EmptyChartInputException (error in {@link #setupEasy()})
-	 */
-	public void runEasy() throws NullPointerException, EmptyChartInputException {
-		this.setupEasy();
-		this.factory.showGui();
-	}
-
-	/**
-	 * performs setup for the {@link #runTrivial()} method by measuring the runtime
-	 * for all given {@link ISolver} instances ({@link #solverMap}) for a defined
-	 * number of repetitions (defined by {@link #NUMBER_OF_RUNS} :
-	 * {@value #NUMBER_OF_RUNS}) to calculate the average runtime of each given
-	 * benchmark file for the difficulty "TRIVIAL". Finally all generated values are
-	 * passed to the {@link IBarChartFactory} instance ({@link #factory})
-	 * 
-	 * @throws NullPointerException     (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 * @throws EmptyChartInputException (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 */
-	public void setupMedium() throws NullPointerException, EmptyChartInputException {
-		// get/sort required benchmark files
-		this.jsonModels = SatProblemFixtures.getMedium().stream()
-				.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-				.collect(Collectors.toList());
-
-//////////////////////////////
-		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
-//////////////////////////////
-		int modelCounter = 0;
-
-		// measure runtime of each retrieved json-model / contained cnf-formula
-		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-			CnfFormula formula = jsonModel.getFormula();
-
-			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
-
-			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-				String solverName = (String) solverIterator.next();
-				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
-
-				progressBarGui.setNewSolverValue(solverCounter++);
-				int runCounter = 0;
-
-				// capture runtimes for given number of rounds
-				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-
-					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
-						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-						break;
-					}
-
-					intermediateResultList.add(timedResult);
-
-					progressBarGui.setNewRoundValue(runCounter++);
-				}
-
-				long sumDuration = 0;
-
-				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
-						.iterator(); resultListIterator.hasNext();) {
-					TimedResult<Optional<Assignment>> result = resultListIterator.next();
-					sumDuration += result.getDurationInMilliseconds();
-				}
-
-				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
-				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
-
-				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
-						intermediateResultList.get(0).getResult(), finalDuration);
-				this.resultList.add(finalResult);
-			}
-		}
-
-		// prepare parameters for BarChartFactory
-		double[] values = new double[this.resultList.size()];
-		String[] names = new String[this.solverMap.size()];
-		String[] categories = new String[this.jsonModels.size()];
-
-		int counter = 0;
-		for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-			String solverName = (String) solverIterator.next();
-			names[counter++] = solverName;
-		}
-
-		counter = 0;
-		for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
-			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
-			StringBuilder builder = new StringBuilder();
-			builder.append(model.getFileName());
-			builder.append(" | ");
-			builder.append("VARIABLES : ");
-			builder.append(model.getFormula().getVariables().size());
-			categories[counter++] = builder.toString();
-		}
-
-		counter = 0;
-		for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
-				.hasNext();) {
-			TimedResult<Optional<Assignment>> result = resultIterator.next();
-			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
-		}
-
-		// pass parameters to BarChartFactory
-		this.factory.setChartTitle("Medium Benchmark : " + NUMBER_OF_RUNS + " runs");
-		this.factory.setNames(names);
-		this.factory.setCategories(categories);
-		this.factory.setValues(values);
-
-		progressBarGui.close();
-	}
-
-	/**
-	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui()}
-	 * ({@link IBarChartFactory}) after medium setup was successful
-	 * ({@link #setupMedium()})
-	 * 
-	 * @throws NullPointerException     (error in {@link #setupMedium()})
-	 * @throws EmptyChartInputException (error in {@link #setupMedium()})
-	 */
-	public void runMedium() throws NullPointerException, EmptyChartInputException {
-		this.setupMedium();
-		this.factory.showGui();
-	}
-
-	/**
-	 * performs setup for the {@link #runHard()} method by measuring the runtime for
-	 * all given {@link ISolver} instances ({@link #solverMap}) for a defined number
-	 * of repetitions (defined by {@link #NUMBER_OF_RUNS} :
-	 * {@value #NUMBER_OF_RUNS}) to calculate the average runtime of each given
-	 * benchmark file for the difficulty "HARD". Finally all generated values are
-	 * passed to the {@link IBarChartFactory} instance ({@link #factory})
-	 * 
-	 * @throws NullPointerException     (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 * @throws EmptyChartInputException (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 */
-	public void setupHard() throws NullPointerException, EmptyChartInputException {
-		// get/sort required benchmark files
-		this.jsonModels = SatProblemFixtures.getHard().stream()
-				.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-				.collect(Collectors.toList());
-
-//////////////////////////////
-		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
-//////////////////////////////
-		int modelCounter = 0;
-
-		// measure runtime of each retrieved json-model / contained cnf-formula
-		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-			CnfFormula formula = jsonModel.getFormula();
-
-			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
-
-			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-				String solverName = (String) solverIterator.next();
-				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
-
-				progressBarGui.setNewSolverValue(solverCounter++);
-				int runCounter = 0;
-
-				// capture runtimes for given number of rounds
-				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-
-					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
-						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-						break;
-					}
-
-					intermediateResultList.add(timedResult);
-
-					progressBarGui.setNewRoundValue(runCounter++);
-				}
-
-				long sumDuration = 0;
-
-				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
-						.iterator(); resultListIterator.hasNext();) {
-					TimedResult<Optional<Assignment>> result = resultListIterator.next();
-					sumDuration += result.getDurationInMilliseconds();
-				}
-
-				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
-				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
-
-				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
-						intermediateResultList.get(0).getResult(), finalDuration);
-				this.resultList.add(finalResult);
-			}
-		}
-
-		// prepare parameters for BarChartFactory
-		double[] values = new double[this.resultList.size()];
-		String[] names = new String[this.solverMap.size()];
-		String[] categories = new String[this.jsonModels.size()];
-
-		int counter = 0;
-		for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-			String solverName = (String) solverIterator.next();
-			names[counter++] = solverName;
-		}
-
-		counter = 0;
-		for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
-			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
-			StringBuilder builder = new StringBuilder();
-			builder.append(model.getFileName());
-			builder.append(" | ");
-			builder.append("VARIABLES : ");
-			builder.append(model.getFormula().getVariables().size());
-			categories[counter++] = builder.toString();
-		}
-
-		counter = 0;
-		for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
-				.hasNext();) {
-			TimedResult<Optional<Assignment>> result = resultIterator.next();
-			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
-		}
-
-		// pass parameters to BarChartFactory
-		this.factory.setChartTitle("Hard Benchmark : " + NUMBER_OF_RUNS + " runs");
-		this.factory.setNames(names);
-		this.factory.setCategories(categories);
-		this.factory.setValues(values);
-
-		progressBarGui.close();
-	}
-
-	/**
-	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui()}
-	 * ({@link IBarChartFactory}) after hard setup was successful
-	 * ({@link #setupHard()})
-	 * 
-	 * @throws NullPointerException     (error in {@link #setupHard()})
-	 * @throws EmptyChartInputException (error in {@link #setupHard()})
-	 */
-	public void runHard() throws NullPointerException, EmptyChartInputException {
-		this.setupHard();
-		this.factory.showGui();
-	}
-
-	/**
-	 * performs setup for the {@link #runInsane()} method by measuring the runtime
-	 * for all given {@link ISolver} instances ({@link #solverMap}) for a defined
-	 * number of repetitions (defined by {@link #NUMBER_OF_RUNS} :
-	 * {@value #NUMBER_OF_RUNS}) to calculate the average runtime of each given
-	 * benchmark file for the difficulty "INSANE". Finally all generated values are
-	 * passed to the {@link IBarChartFactory} instance ({@link #factory})
-	 * 
-	 * @throws NullPointerException     (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 * @throws EmptyChartInputException (if not all required parameters are passed
-	 *                                  to {@link #factory} properly)
-	 */
-	public void setupInsane() throws NullPointerException, EmptyChartInputException {
-		// get/sort required benchmark files
-		this.jsonModels = SatProblemFixtures.getInsane().stream()
-				.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-				.collect(Collectors.toList());
-
-//////////////////////////////
-		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), NUMBER_OF_RUNS);
-//////////////////////////////
-		int modelCounter = 0;
-
-		// measure runtime of each retrieved json-model / contained cnf-formula
-		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
-			SatProblemJsonModel jsonModel = (SatProblemJsonModel) jsonModelsIterator.next();
-			CnfFormula formula = jsonModel.getFormula();
-
-			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
-
-			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-				String solverName = (String) solverIterator.next();
-				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
-				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
-
-				progressBarGui.setNewSolverValue(solverCounter++);
-				int runCounter = 0;
-
-				// capture runtimes for given number of rounds
-				for (int i = 0; i < NUMBER_OF_RUNS; i++) {
-					TimedResult<Optional<Assignment>> timedResult = runner.runTimed(currentSolver, formula);
-
-					if (timedResult.getDurationInMilliseconds() >= (timeout * 60 * 1000)) {
-						intermediateResultList.add(new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0));
-						break;
-					}
-
-					intermediateResultList.add(timedResult);
-
-					progressBarGui.setNewRoundValue(runCounter++);
-				}
-
-				long sumDuration = 0;
-
-				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
-						.iterator(); resultListIterator.hasNext();) {
-					TimedResult<Optional<Assignment>> result = resultListIterator.next();
-					sumDuration += result.getDurationInMilliseconds();
-				}
-
-				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (NUMBER_OF_RUNS));
-				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
-
-				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
-						intermediateResultList.get(0).getResult(), finalDuration);
-				this.resultList.add(finalResult);
-			}
-		}
-
-		// prepare parameters for BarChartFactory
-		double[] values = new double[this.resultList.size()];
-		String[] names = new String[this.solverMap.size()];
-		String[] categories = new String[this.jsonModels.size()];
-
-		int counter = 0;
-		for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
-			String solverName = (String) solverIterator.next();
-			names[counter++] = solverName;
-		}
-
-		counter = 0;
-		for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
-			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
-			StringBuilder builder = new StringBuilder();
-			builder.append(model.getFileName());
-			builder.append(" | ");
-			builder.append("VARIABLES : ");
-			builder.append(model.getFormula().getVariables().size());
-			categories[counter++] = builder.toString();
-		}
-
-		counter = 0;
-		for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
-				.hasNext();) {
-			TimedResult<Optional<Assignment>> result = resultIterator.next();
-			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
-		}
-
-		// pass parameters to BarChartFactory
-		this.factory.setChartTitle("Insane Benchmark : " + NUMBER_OF_RUNS + " runs");
-		this.factory.setNames(names);
-		this.factory.setCategories(categories);
-		this.factory.setValues(values);
-
-		progressBarGui.close();
-	}
-
-	/**
-	 * calls {@link #org.mbe.sat.assignment.gui.BarChartFactory.showGui()}
-	 * ({@link IBarChartFactory}) after insane setup was successful
-	 * ({@link #setupInsane()})
-	 * 
-	 * @throws NullPointerException     (error in {@link #setupInsane()})
-	 * @throws EmptyChartInputException (error in {@link #setupInsane()})
-	 */
-	public void runInsane() throws NullPointerException, EmptyChartInputException {
-		this.setupInsane();
-		this.factory.showGui();
 	}
 }
