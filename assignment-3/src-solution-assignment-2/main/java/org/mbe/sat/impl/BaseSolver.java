@@ -87,18 +87,24 @@ public class BaseSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 				return Optional.empty();
 			}
 
-			boolean[] nextCombination = sequentialCombinationProvider.next();
-			CnfFormula wipFormula = new CnfFormula(new ArrayList<>(formula.getOperands()));
+			Assignment assignment = null;
+			try {
+				boolean[] nextCombination = sequentialCombinationProvider.next();
+				CnfFormula wipFormula = new CnfFormula(new ArrayList<>(formula.getOperands()));
 
-			// Get the next assignment and check if the formula evaluates to TRUE
-			Assignment assignment = Assignment.from(variables, nextCombination);
+				// Get the next assignment and check if the formula evaluates to TRUE
+				assignment = Assignment.from(variables, nextCombination);
 
-			// Simplify the CNF to minimize the evaluation effort
-			CnfFormula simplifiedFormula = simplifier.simplify(wipFormula, assignment);
+				// Simplify the CNF to minimize the evaluation effort
+				CnfFormula simplifiedFormula = simplifier.simplify(wipFormula, assignment);
 
-			// Return the satisfying assignment if the formula was minimized to the empty
-			// formula
-			if (simplifiedFormula.isEmpty()) {
+				// Return the satisfying assignment if the formula was minimized to the empty
+				// formula
+				if (simplifiedFormula.isEmpty()) {
+					return Optional.of(assignment);
+				}
+			} catch (Exception e) {
+				System.out.println("Error occured!");
 				return Optional.of(assignment);
 			}
 		}

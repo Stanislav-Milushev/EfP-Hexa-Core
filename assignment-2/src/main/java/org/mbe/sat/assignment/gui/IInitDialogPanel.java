@@ -1,12 +1,8 @@
 package org.mbe.sat.assignment.gui;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.mbe.sat.api.solver.ISolver;
 import org.mbe.sat.assignment.gui.InitDialogPanel.Difficulty;
-import org.mbe.sat.core.model.Assignment;
-import org.mbe.sat.core.model.formula.CnfFormula;
 
 /**
  * @author User Darwin Brambor

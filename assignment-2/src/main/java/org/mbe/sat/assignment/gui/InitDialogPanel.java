@@ -2,26 +2,15 @@ package org.mbe.sat.assignment.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import javax.swing.JPanel;
-
-import org.mbe.sat.api.solver.ISolver;
-import org.mbe.sat.core.model.Assignment;
-import org.mbe.sat.core.model.formula.CnfFormula;
 import java.awt.GridLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import org.mbe.sat.assignment.gui.InitDialogPanel.Difficulty;
 import org.mbe.sat.assignment.solver.BaseSolver;
-
 import javax.swing.JCheckBox;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -33,6 +22,7 @@ import java.awt.Dimension;
  * @author User Darwin Brambor
  *
  */
+@SuppressWarnings("serial")
 public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	/**
 	 * timeout label
@@ -53,7 +43,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	/**
 	 * enables the user to select from all available {@link Difficulty difficulties}
 	 */
-	private JComboBox difficultyCombobox;
+	private JComboBox<Object> difficultyCombobox;
 	/**
 	 * enables the user to include the {@link BaseSolver base-solver} in the current
 	 * benchmark if selected
@@ -136,13 +126,13 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 
 		JLabel lblNewLabel = new JLabel("Difficulty");
 
-		difficultyCombobox = new JComboBox();
+		difficultyCombobox = new JComboBox<Object>();
 		difficultyCombobox.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				diff = (Difficulty) difficultyCombobox.getSelectedItem();
 			}
 		});
-		difficultyCombobox.setModel(new DefaultComboBoxModel(Difficulty.values()));
+		difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel).addGap(18)
@@ -211,17 +201,18 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		panel.add(runValueLabel);
 
 		runSlider = new JSlider();
+		runSlider.setPaintTicks(true);
+		runSlider.setMaximum(1000);
 		runSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				runValueLabel.setText(runSlider.getValue() + " runs");
 				numberOfRuns = runSlider.getValue();
 			}
 		});
-		runSlider.setValue(5);
+		runSlider.setValue(10);
 		runSlider.setMinorTickSpacing(1);
-		runSlider.setMajorTickSpacing(10);
+		runSlider.setMajorTickSpacing(100);
 		runSlider.setSnapToTicks(true);
-		runSlider.setPaintTicks(true);
 		runSlider.setPaintLabels(true);
 		panel_3.add(runSlider);
 
@@ -246,7 +237,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 				timeout = timeoutSlider.getValue();
 			}
 		});
-		timeoutSlider.setValue(5);
+		timeoutSlider.setValue(15);
 		timeoutSlider.setSnapToTicks(true);
 		timeoutSlider.setPaintTicks(true);
 		timeoutSlider.setPaintLabels(true);

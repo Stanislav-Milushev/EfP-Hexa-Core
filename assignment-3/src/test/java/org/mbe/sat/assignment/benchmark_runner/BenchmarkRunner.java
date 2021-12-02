@@ -1,22 +1,14 @@
 package org.mbe.sat.assignment.benchmark_runner;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 import org.mbe.sat.api.solver.ISolver;
 import org.mbe.sat.assignment.DpSolver;
 import org.mbe.sat.assignment.exceptions.EmptyChartInputException;
@@ -28,13 +20,13 @@ import org.mbe.sat.assignment.gui.InitDialogPanel;
 import org.mbe.sat.assignment.gui.InitDialogPanel.Difficulty;
 import org.mbe.sat.assignment.gui.ProgressBarGui;
 import org.mbe.sat.assignment.gui.UserCommunication;
-import org.mbe.sat.assignment.solver.BaseSolver;
 import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.problem.SatProblemFixtures;
 import org.mbe.sat.core.problem.SatProblemJsonModel;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner;
 import org.mbe.sat.core.runner.TimedCnfSolvableRunner.TimedResult;
+import org.mbe.sat.impl.BaseSolver;
 
 /**
  * @author User Darwin Brambor
@@ -104,9 +96,11 @@ class SolverRunnable implements Runnable {
 
 public class BenchmarkRunner {
 
+	private static final int FACTOR = 100;
 	/**
 	 * runs the {@link #solver}
 	 */
+	@SuppressWarnings("unused")
 	private TimedCnfSolvableRunner runner;
 	/**
 	 * wrapper class for providing a {@link IBarChartGui} instance to display the
@@ -222,8 +216,13 @@ public class BenchmarkRunner {
 		// init-dialog
 		IInitDialogPanel panel = new InitDialogPanel();
 		while (true) {
-			JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK", JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.PLAIN_MESSAGE);
+			int choice = JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK",
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+			if (choice != JOptionPane.YES_OPTION) {
+				System.exit(0);
+			}
+
 			StringBuilder errorMessageBuilder = new StringBuilder("ERROR : \n");
 
 			if (panel.validateNumberOfRuns()) {
@@ -238,9 +237,11 @@ public class BenchmarkRunner {
 							switch (panel.getSelectedSolvers().get(i)) {
 							case IInitDialogPanel.BASE_SOLVER_STRING:
 								runner.addSolver(i + 1 + " : Base-Solver", new BaseSolver());
+								runner.addSolver(i + 1 + ".2 : Base-Solver", new BaseSolver());
 								break;
 							case IInitDialogPanel.DP_SOLVER_STRING:
-								runner.addSolver(i + 1 + " : Dp-Solver", new DpSolver());
+								runner.addSolver(i + 1 + " : DP-Solver", new DpSolver());
+								runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.SOLVER_3_STRING:
 								break;
@@ -345,7 +346,7 @@ public class BenchmarkRunner {
 		//////////////////////////////
 		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), numberOfRuns);
 		//////////////////////////////
-		int modelCounter = 0;
+		int modelCounter = 1;
 
 		// measure runtime of each retrieved json-model / contained cnf-formula
 		for (Iterator<SatProblemJsonModel> jsonModelsIterator = jsonModels.iterator(); jsonModelsIterator.hasNext();) {
@@ -353,7 +354,7 @@ public class BenchmarkRunner {
 			CnfFormula formula = jsonModel.getFormula();
 
 			progressBarGui.setNewBenchmarkValue(modelCounter++);
-			int solverCounter = 0;
+			int solverCounter = 1;
 			boolean timeoutDue = false;
 
 			for (Iterator<String> solverIterator = this.solverMap.keySet().iterator(); solverIterator.hasNext();) {
@@ -398,7 +399,7 @@ public class BenchmarkRunner {
 							break;
 						}
 						try {
-							Thread.sleep(100);
+							Thread.sleep(10);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -421,13 +422,12 @@ public class BenchmarkRunner {
 
 					intermediateResultList.add(timedResult);
 
-					progressBarGui.setNewRunValue(runCounter);
+					progressBarGui.setNewRunValue(runCounter++);
 
 					if (timeoutDue) {
 						currentSolver.terminate(false);
 						break;
 					}
-					runCounter++;
 				}
 
 				long sumDuration = 0;
@@ -439,7 +439,7 @@ public class BenchmarkRunner {
 				}
 
 				// calculate average runtime
-				long finalDuration = ((sumDuration * 1000000) / (numberOfRuns));
+				long finalDuration = ((sumDuration * BenchmarkRunner.FACTOR) / (numberOfRuns));
 				// double finalDuration = ((double)sumDuration / (double)NUMBER_OF_ROUNDS);
 
 				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
@@ -464,9 +464,10 @@ public class BenchmarkRunner {
 			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
 			StringBuilder builder = new StringBuilder();
 			builder.append(model.getFileName());
-			builder.append(" | ");
-			builder.append("VARIABLES : ");
+			builder.append("\n");
+			builder.append("VARIABLES:");
 			builder.append(model.getFormula().getVariables().size());
+			// builder.append(" | \n");
 			categories[counter++] = builder.toString();
 		}
 
@@ -474,7 +475,7 @@ public class BenchmarkRunner {
 		for (Iterator<TimedResult<Optional<Assignment>>> resultIterator = this.resultList.iterator(); resultIterator
 				.hasNext();) {
 			TimedResult<Optional<Assignment>> result = resultIterator.next();
-			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) 1000000);
+			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) BenchmarkRunner.FACTOR);
 		}
 
 		// pass parameters to BarChartFactory

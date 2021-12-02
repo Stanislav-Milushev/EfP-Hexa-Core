@@ -1,19 +1,19 @@
 package org.mbe.sat.assignment.gui;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
-
+import org.jfree.ui.TextAnchor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,10 +26,79 @@ import java.awt.event.WindowListener;
  * @author Darwin Brambor
  *
  */
+@SuppressWarnings("serial")
 public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 	// values
 
+	/**
+	 * maximum number of bars shown in the bar chart at a time
+	 */
+	private static final int BARS_PER_PAGE = 4;
+	/**
+	 * space between two categories
+	 */
+	private static final double DEFAULT_CATEGORY_MARGIN = 0.2;
+	/**
+	 * space between two items
+	 */
+	private static final double DEFAULT_ITEM_MARGIN = 0.2;
+	/**
+	 * default font type
+	 */
+	private static final int DEFAULT_FONT_TYPE = Font.PLAIN;
+	/**
+	 * default font size for the y-axis label
+	 */
+	private static final int DEFAULT_RANGE_LABEL_FONT_SIZE = 20;
+	/**
+	 * default font size for the y-axis value-labels
+	 */
+	private static final int DEFAULT_RANGE_TICK_LABEL_FONT_SIZE = 15;
+	/**
+	 * flag to tell if URLs shall be shown in the diagram or not
+	 */
+	private static final boolean DEFAULT_URL = false;
+	/**
+	 * flag to tell if tooltips shall be shown in the diagram or not
+	 */
+	private static final boolean DEFAULT_TOOLTIP = true;
+	/**
+	 * flag to tell if the legend shall be shown in the diagram or not
+	 */
+	private static final boolean DEFAULT_LEGEND = true;
+	/**
+	 * default plot orientation
+	 */
+	private static final PlotOrientation DEFAULT_PLOT_ORIENTATION = PlotOrientation.VERTICAL;
+	/**
+	 * default fixed chart panel height
+	 */
+	private static final int DEFAULT_CHART_PANEL_HEIGHT = 650;
+	/**
+	 * default fixed chart panel width
+	 */
+	private static final int DEFAULT_CHART_PANEL_WIDTH = 1400;
+	/**
+	 * number of lines to show an potentially multiline category name
+	 */
+	private static final int DEFAULT_LINES_PER_CATEGORY = 2;
+	/**
+	 * default axis label font size
+	 */
+	private static final int DEFAULT_AXIS_LABEL_FONT_SIZE = 25;
+	/**
+	 * default font
+	 */
+	private static final String DEFAULT_FONT_VALUE = "Arial";
+	/**
+	 * description of the category axis
+	 */
+	private static final String CATEGORY_AXIS_TEXT = "benchmark-files";
+	/**
+	 * description of the value axis
+	 */
+	private static final String VALUE_AXIS_TEXT = "t in miliseconds";
 	/**
 	 * {@link IBarChartFactory} instance to handle requests of this gui
 	 */
@@ -53,10 +122,6 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	 */
 	private String[] categories;
 	/**
-	 * maximum number of bars shown in the bar chart at a time
-	 */
-	private static final int BARS_PER_PAGE = 8;
-	/**
 	 * pointer for the {@link #values} array and the {@link #categories} array to
 	 * show the next / previous {@value #BARS_PER_PAGE} elements of the arrays as
 	 * bar chart
@@ -65,6 +130,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * number of compared instances for each {@link #categories category}
 	 */
+	@SuppressWarnings("unused")
 	private int numComparedInstances;
 
 	// components
@@ -144,11 +210,13 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 		// init components
 
-		this.barChart = ChartFactory.createBarChart3D(this.title, "benchmark-files", "t in miliseconds",
-				createDataset(), PlotOrientation.VERTICAL, true, true, false);
+		this.barChart = ChartFactory.createBarChart3D(this.title, BarChartGui.CATEGORY_AXIS_TEXT,
+				BarChartGui.VALUE_AXIS_TEXT, createDataset(), BarChartGui.DEFAULT_PLOT_ORIENTATION,
+				BarChartGui.DEFAULT_LEGEND, BarChartGui.DEFAULT_TOOLTIP, BarChartGui.DEFAULT_URL);
 
-		this.chartPanel = new ChartPanel(this.barChart);
-		chartPanel.setPreferredSize(new java.awt.Dimension(1000, 650));
+		chartPanel = new ChartPanel(this.barChart);
+		chartPanel.setPreferredSize(
+				new java.awt.Dimension(BarChartGui.DEFAULT_CHART_PANEL_WIDTH, BarChartGui.DEFAULT_CHART_PANEL_HEIGHT));
 
 		this.exitButton = new JButton("EXIT");
 		this.exportButton = new JButton("EXPORT");
@@ -170,9 +238,6 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 		container.add(subcontainer, BorderLayout.SOUTH);
 
 		setContentPane(container);
-		this.pack();
-		RefineryUtilities.centerFrameOnScreen(this);
-		this.setVisible(true);
 
 		// Add Listener
 
@@ -195,9 +260,11 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pointer -= BARS_PER_PAGE;
-				if (pointer <= 0) {
+
+				if (pointer < 0) {
 					pointer = 0;
 				}
+
 				updateChart();
 			}
 		});
@@ -207,9 +274,11 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pointer += BARS_PER_PAGE;
+
 				if (pointer >= categories.length) {
 					pointer -= BARS_PER_PAGE;
 				}
+
 				updateChart();
 			}
 		});
@@ -225,15 +294,64 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 //		BarRenderer renderer=(BarRenderer)plot.getRenderer();
 //		renderer.setItemMargin(0.1);
 
-		this.setResizable(false);
+		customizeChart();
 
+		// finish
+		this.setResizable(false);
+		this.pack();
+		RefineryUtilities.centerFrameOnScreen(this);
+		this.setVisible(true);
+	}
+
+	/**
+	 * customize the {@link #barChart} to fulfill certain criteria (e.g. logarithmic
+	 * y-axis)
+	 */
+	private void customizeChart() {
 		// customizations
 
 		// decrease space between bars of one category
-		((BarRenderer) this.barChart.getCategoryPlot().getRenderer()).setItemMargin(0.0);
+		((BarRenderer) this.barChart.getCategoryPlot().getRenderer()).setItemMargin(BarChartGui.DEFAULT_ITEM_MARGIN);
+
+		// set logarithmic value axis
+		LogAxis logAxis = new LogAxis();
+		logAxis.setLabel(VALUE_AXIS_TEXT);
+		logAxis.setSmallestValue(0.01);
+		this.barChart.getCategoryPlot().setRangeAxis(logAxis);
+
+		this.barChart.setAntiAlias(true);
+//		this.barChart.getCategoryPlot().getDomainAxis()
+//				.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6));
+		this.barChart.getCategoryPlot().getDomainAxis().setCategoryMargin(BarChartGui.DEFAULT_CATEGORY_MARGIN);
+
+		// category axis text customization
+		// this.barChart.getCategoryPlot().getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+		this.barChart.getCategoryPlot().getDomainAxis()
+				.setMaximumCategoryLabelLines(BarChartGui.DEFAULT_LINES_PER_CATEGORY);
+		this.barChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new Font(BarChartGui.DEFAULT_FONT_VALUE,
+				BarChartGui.DEFAULT_FONT_TYPE, BarChartGui.DEFAULT_RANGE_TICK_LABEL_FONT_SIZE));
+		this.barChart.getCategoryPlot().getRangeAxis().setLabelFont(new Font(BarChartGui.DEFAULT_FONT_VALUE,
+				BarChartGui.DEFAULT_FONT_TYPE, BarChartGui.DEFAULT_RANGE_LABEL_FONT_SIZE));
+
+		for (int i = 0; i < this.barChart.getCategoryPlot().getLegendItems().getItemCount(); i++) {
+			this.barChart.getCategoryPlot().getRenderer().setSeriesItemLabelGenerator(i,
+					new StandardCategoryItemLabelGenerator());
+			this.barChart.getCategoryPlot().getRenderer().setSeriesItemLabelsVisible(i, true);
+			this.barChart.getCategoryPlot().getRenderer()
+					.setBaseItemLabelFont(new Font(BarChartGui.DEFAULT_FONT_VALUE, Font.ROMAN_BASELINE, 16));
+
+		}
+
+		this.barChart.getCategoryPlot().getRenderer().setBasePositiveItemLabelPosition(
+				new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_LEFT));
 
 		// set font of heading
-		this.barChart.getTitle().setFont(new Font("Arial", Font.PLAIN, 25));
+		this.barChart.getTitle().setFont(new Font(BarChartGui.DEFAULT_FONT_VALUE, BarChartGui.DEFAULT_FONT_TYPE,
+				BarChartGui.DEFAULT_AXIS_LABEL_FONT_SIZE));
+
+		// chartPanel customization
+		chartPanel.setMaximumDrawHeight(BarChartGui.DEFAULT_CHART_PANEL_HEIGHT);
+		chartPanel.setMaximumDrawWidth(BarChartGui.DEFAULT_CHART_PANEL_WIDTH);
 	}
 
 	/**
@@ -241,17 +359,10 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	 * (next/previous) elements according to the current {@link #pointer} value
 	 */
 	private void updateChart() {
-		barChart = ChartFactory.createBarChart3D(this.title, "benchmark-files", "t in miliseconds", createDataset(),
-				PlotOrientation.VERTICAL, true, true, false);
-
-		// customizations
-
-		// decrease space between bars of one category
-		((BarRenderer) this.barChart.getCategoryPlot().getRenderer()).setItemMargin(0.0);
-
-		// set font of heading
-		this.barChart.getTitle().setFont(new Font("Arial", Font.PLAIN, 25));
-
+		barChart = ChartFactory.createBarChart3D(this.title, BarChartGui.CATEGORY_AXIS_TEXT,
+				BarChartGui.VALUE_AXIS_TEXT, createDataset(), BarChartGui.DEFAULT_PLOT_ORIENTATION,
+				BarChartGui.DEFAULT_LEGEND, BarChartGui.DEFAULT_TOOLTIP, BarChartGui.DEFAULT_URL);
+		customizeChart();
 		chartPanel.setChart(barChart);
 	}
 
@@ -280,34 +391,16 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 		 * dataset.addValue(3.0, bmw, millage); dataset.addValue(6.0, bmw, safety);
 		 */
 
-//        for(int i=0; i<this.categories.length; i++){
-//            for(int j=0; j<this.names.length; j++){
-//                dataset.addValue(this.values[i],this.names[j],this.categories[i]);
-//            }
-//        }
-
-//		for (int i = 0; i < BARS_PER_PAGE; i++) {
-//			if ((this.pointer + i) >= this.values.length) {
-//				// this.pointer=0;
-//				break;
-//			}
-//			dataset.addValue(this.values[this.pointer + i], this.names[0], this.categories[this.pointer + i]);
-//		}
-
-		int index = 0;
-		int nameCounter = 0;
+		int valueIndex = this.pointer * this.names.length;
 
 		for (int i = 0; i < BARS_PER_PAGE; i++) {
-			if ((this.pointer + i) >= this.categories.length) {
-				break;
-			}
-
-			for (int j = 0; j < this.numComparedInstances; j++) {
-				dataset.addValue(this.values[index++], this.names[nameCounter++], this.categories[i + this.pointer]);
-				nameCounter %= this.names.length;
+			for (int j = 0; j < names.length; j++) {
+				if (valueIndex >= values.length) {
+					break;
+				}
+				dataset.addValue(values[valueIndex++], names[j], categories[this.pointer + i]);
 			}
 		}
-
 		return dataset;
 	}
 

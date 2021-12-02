@@ -12,6 +12,7 @@ import javax.swing.border.EmptyBorder;
  * @author User Darwin Brambor
  *
  */
+@SuppressWarnings("serial")
 public class ProgressBarGui extends JFrame {
 
 	private JPanel contentPane;
