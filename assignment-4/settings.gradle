@@ -1,0 +1,9 @@
+rootProject.name = 'assignment-4'
+
+// Add reference to assignment 2
+include ':assignment-2'
+project(':assignment-2').projectDir = new File("../../A2/code")
+
+// Add reference to assignment 3
+include ':assignment-3'
+project(':assignment-3').projectDir = new File("../../A3/code")

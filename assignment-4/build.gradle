@@ -1,0 +1,56 @@
+plugins {
+
+    // This Gradle is defined as a library. This way we can consume and expose dependencies using the keyword 'api'.
+    // Libraries defined in this module using the 'api' keyword are available to all dependent modules (modules that
+    // depend on 'assignment-2'
+    id 'java-library'
+    
+    // This plugin enables us to expose test classes as fixtures to other projects (next assignments)
+    // https://docs.gradle.org/current/userguide/java_testing.html#sec:java_test_fixtures
+    // In our case we mainly share the SAT problems along with the utility classes and abstract test class so that the
+    // solver implementations can be tested in each subsequent assignment
+    id 'java-test-fixtures'
+}
+
+group 'org.mbe.sat.assignment'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+// This defines an additional Java source folder which contains the solution for assignment 3 as well as SAT-Framework
+// source code that is required for assignment 3
+sourceSets {
+    srcDep {
+        main {
+            java {
+                srcDir 'src-framework/main/java'
+            }
+        }
+        test {
+            java {
+                srcDir 'src-framework/test/java'
+            }
+        }
+    }
+    srcSolutionAssignment2 {
+        main {
+            java {
+                srcDir 'src-solution-assignment-3/main/java'
+            }
+        }
+        test {
+            java {
+                srcDir 'src-solution-assignment-3/test/java'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':assignment-2')
+    api project(':assignment-3')
+    testImplementation(testFixtures(project(':assignment-2') ))
+    testImplementation(testFixtures(project(':assignment-3') ))
+}
