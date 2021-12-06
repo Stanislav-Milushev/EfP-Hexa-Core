@@ -30,6 +30,8 @@ public abstract class AbstractDpSolver implements ISolver<CnfFormula, Optional<A
      */
     protected Assignment satisfyingAssignment;
 
+    protected boolean terminate;
+    
     /**
      * Solves the given CNF formula by finding a satisfying assignment using a recursive decision tree. Partial
      * assignments that can no longer lead to a satisfying assignment, will be skipped.
@@ -41,6 +43,10 @@ public abstract class AbstractDpSolver implements ISolver<CnfFormula, Optional<A
     @Override
     public Optional<Assignment> solve(CnfFormula cnfFormula) {
 
+    	if (terminate) {
+			return Optional.empty();
+		}
+    	
         // Check trivial cases to check if formula is satisfiable
         if (cnfFormula.isEmpty()) {
             // If the formula is empty, it is satisfiable
@@ -144,4 +150,14 @@ public abstract class AbstractDpSolver implements ISolver<CnfFormula, Optional<A
     protected Variable pick(CnfFormula cnfFormula) {
         return cnfFormula.getVariables().iterator().next();
     }
+    
+	@Override
+	public void terminate(boolean choice) {
+		this.terminate=choice;
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return this.terminate;
+	}
 }

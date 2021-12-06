@@ -338,12 +338,15 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 					new StandardCategoryItemLabelGenerator());
 			this.barChart.getCategoryPlot().getRenderer().setSeriesItemLabelsVisible(i, true);
 			this.barChart.getCategoryPlot().getRenderer()
-					.setBaseItemLabelFont(new Font(BarChartGui.DEFAULT_FONT_VALUE, Font.ROMAN_BASELINE, 16));
+					.setBaseItemLabelFont(new Font(BarChartGui.DEFAULT_FONT_VALUE, Font.ROMAN_BASELINE, 12));
 
 		}
 
-		this.barChart.getCategoryPlot().getRenderer().setBasePositiveItemLabelPosition(
-				new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_LEFT));
+//		this.barChart.getCategoryPlot().getRenderer().setBasePositiveItemLabelPosition(
+//				new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_LEFT));
+
+		this.barChart.getCategoryPlot().getRenderer().setBasePositiveItemLabelPosition(new ItemLabelPosition(
+				ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_LEFT, TextAnchor.BOTTOM_LEFT, (-Math.PI / 4)));
 
 		// set font of heading
 		this.barChart.getTitle().setFont(new Font(BarChartGui.DEFAULT_FONT_VALUE, BarChartGui.DEFAULT_FONT_TYPE,

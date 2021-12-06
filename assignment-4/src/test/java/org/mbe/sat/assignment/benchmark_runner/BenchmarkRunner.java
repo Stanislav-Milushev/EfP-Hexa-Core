@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import org.mbe.assignment.sat.DpllSolver;
 import org.mbe.sat.api.solver.ISolver;
 import org.mbe.sat.assignment.DpSolver;
 import org.mbe.sat.assignment.exceptions.EmptyChartInputException;
@@ -237,13 +239,16 @@ public class BenchmarkRunner {
 							switch (panel.getSelectedSolvers().get(i)) {
 							case IInitDialogPanel.BASE_SOLVER_STRING:
 								runner.addSolver(i + 1 + " : Base-Solver", new BaseSolver());
-								runner.addSolver(i + 1 + ".2 : Base-Solver", new BaseSolver());
+								//runner.addSolver(i + 1 + ".2 : Base-Solver", new BaseSolver());
 								break;
 							case IInitDialogPanel.DP_SOLVER_STRING:
 								runner.addSolver(i + 1 + " : DP-Solver", new DpSolver());
-								runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
+								//runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.DPLL_SOLVER:
+								runner.addSolver(i+1+".1 : DPLL-Solver", new DpllSolver());
+								runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
+								
 								break;
 							case IInitDialogPanel.SOLVER_4_STRING:
 								break;

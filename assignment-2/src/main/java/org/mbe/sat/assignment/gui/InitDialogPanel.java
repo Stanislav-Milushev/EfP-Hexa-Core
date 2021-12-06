@@ -57,7 +57,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	/**
 	 * placeholder
 	 */
-	private JCheckBox solver3Checkbox;
+	private JCheckBox dpllCheckbox;
 	/**
 	 * placeholder
 	 */
@@ -79,7 +79,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	private boolean dpSolverSelected;
 	/**
 	 * boolean value corresponds to the current selection state of
-	 * {@link #solver3Checkbox}
+	 * {@link #dpllCheckbox}
 	 */
 	private boolean solver3Selected;
 	/**
@@ -107,7 +107,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		this.diff = Difficulty.TRIVIAL;
 		this.baseSolverSelected = this.baseCheckbox.isSelected();
 		this.dpSolverSelected = this.baseCheckbox.isSelected();
-		this.solver3Selected = this.solver3Checkbox.isSelected();
+		this.solver3Selected = this.dpllCheckbox.isSelected();
 		this.solver4Selected = this.solver4Checkbox.isSelected();
 		this.numberOfRuns = this.runSlider.getValue();
 		this.timeout = this.timeoutSlider.getValue();
@@ -167,14 +167,15 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		panel_2.setLayout(new GridLayout(2, 2, 0, 0));
 		panel_2.add(baseCheckbox);
 
-		solver3Checkbox = new JCheckBox("Solver 3");
-		solver3Checkbox.addChangeListener(new ChangeListener() {
+		dpllCheckbox = new JCheckBox("DPLL-Solver");
+		dpllCheckbox.setSelected(true);
+		dpllCheckbox.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				solver3Selected = solver3Checkbox.isSelected();
+				solver3Selected = dpllCheckbox.isSelected();
 			}
 		});
-		solver3Checkbox.setEnabled(false);
-		panel_2.add(solver3Checkbox);
+		dpllCheckbox.setEnabled(true);
+		panel_2.add(dpllCheckbox);
 		panel_2.add(dpCheckbox);
 
 		solver4Checkbox = new JCheckBox("Solver 4");
@@ -277,7 +278,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		}
 
 		if (this.solver3Selected) {
-			resultList.add(SOLVER_3_STRING);
+			resultList.add(DPLL_SOLVER);
 		}
 
 		if (this.solver4Selected) {

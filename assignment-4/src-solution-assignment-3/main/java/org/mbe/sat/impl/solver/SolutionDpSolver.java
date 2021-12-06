@@ -12,9 +12,10 @@ import org.mbe.sat.impl.procedure.SolutionSimplifier;
 public class SolutionDpSolver extends AbstractDpSolver {
 
     private final ISimplifier<CnfFormula, Assignment> simplifier;
-
+    
     public SolutionDpSolver() {
         this.simplifier = new SolutionSimplifier();
+        this.terminate=false;
     }
 
     /**
@@ -30,4 +31,5 @@ public class SolutionDpSolver extends AbstractDpSolver {
     protected CnfFormula simplifyFormula(CnfFormula formula, Assignment newAssignment) {
         return simplifier.simplify(formula, newAssignment);
     }
+
 }

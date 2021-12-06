@@ -21,7 +21,7 @@ public interface IInitDialogPanel {
 	/**
 	 * placeholder
 	 */
-	public static final String SOLVER_3_STRING = "SOLVER_3";
+	public static final String DPLL_SOLVER = "DPLL_SOLVER";
 	/**
 	 * placeholder
 	 */
@@ -35,7 +35,7 @@ public interface IInitDialogPanel {
 	/**
 	 * @return user selection of available {@link ISolver}s represented as
 	 *         {@link String}; possible values are
-	 *         {@value #BASE_SOLVER_STRING},{@value #DP_SOLVER_STRING},{@value #SOLVER_3_STRING}
+	 *         {@value #BASE_SOLVER_STRING},{@value #DP_SOLVER_STRING},{@value #DPLL_SOLVER}
 	 *         and {@value #SOLVER_4_STRING}
 	 */
 	public List<String> getSelectedSolvers();
