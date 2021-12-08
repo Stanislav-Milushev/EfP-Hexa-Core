@@ -28,6 +28,8 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 
     private boolean terminate;
     
+    public static Set<Variable> allVariables;
+    
     /**
      * Creates a new instance of {@link DpllSolver}.
      */
@@ -50,14 +52,17 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
     @Override
     public Optional<Assignment> solve(CnfFormula cnfFormula) {
         LOG.debug("Solving formula '{}' using '{}'", cnfFormula, getClass().getSimpleName());
-        
+        allVariables = cnfFormula.getVariables();
         ////////////////
         Assignment assignment = new Assignment();
 		Optional<Assignment> result = DPLLAlgorithmus(cnfFormula, assignment);
         ////////////////
         
-        this.terminate=false;
-        return Optional.empty();
+        this.terminate = false;
+        if(!result.isPresent()) {
+        	return Optional.empty();
+        }
+        return result;
     }
 
 	/**
@@ -74,30 +79,42 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 			return Optional.empty();
 		}
 
+		Optional<Assignment> assPLE = new PureLiteralElimination(simplifier).ple(cnfFormula);
+		Optional<Assignment> assUP = new UnitPropagation(simplifier).up(cnfFormula);
+
+		if(!assUP.equals(Optional.empty())) {
+			for (Iterator<Variable> iterator = assUP.get().getVariables().iterator(); iterator.hasNext();) {
+				Variable variable = iterator.next();
+				assignment.setValue(variable, assUP.get().getValue(variable).isTrue());
+			}
+		}
+		if(!assPLE.equals(Optional.empty())) {
+			for (Iterator<Variable> iterator = assPLE.get().getVariables().iterator(); iterator.hasNext();) {
+				Variable variable = iterator.next();
+				assignment.setValue(variable, assPLE.get().getValue(variable).isTrue());
+			}
+		}
+		
+
+		cnfFormula = simplifier.simplify(cnfFormula, assignment);
 		CnfFormula cnfFormulaSimplified = simplifier.simplify(cnfFormula, assignment);
 
 		if (hasEmptyClause(cnfFormulaSimplified)) {
 			return Optional.empty();
-		} else if (cnfFormulaSimplified.getOperands().size() < 1) {
-			
-			//Kanidat : PLE / UP
-		
+		} else if (cnfFormulaSimplified.getOperands().size() < 1) {		
 			fillUnusedVariablesForSatisfyingAssignment(assignment, cnfFormula);
 			return Optional.of(assignment);
 		}
-
-		
 		
 		Variable nextUnusedVariable = getNextUnusedVariable(cnfFormula, assignment);
-		if (nextUnusedVariable == null) {
-			return Optional.of(assignment);
-		}
-
-		Assignment nextTrue = assignment;
-		Assignment nextFalse = cloneAssignment(assignment);
-
+		if (nextUnusedVariable == null) { return Optional.of(assignment); }
+		 
+		Assignment nextTrue = assignment; Assignment nextFalse = cloneAssignment(assignment);
+		 
 		nextTrue.setValue(nextUnusedVariable, true);
 		nextFalse.setValue(nextUnusedVariable, false);
+
+		
 		Optional<Assignment> returnValue = DPLLAlgorithmus(cnfFormula, nextTrue);
 
 		return !returnValue.isPresent() ? DPLLAlgorithmus(cnfFormula, nextFalse) : returnValue;
@@ -112,7 +129,7 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 	 * @param cnf the formula that contains all variables
 	 */
 	private void fillUnusedVariablesForSatisfyingAssignment(Assignment ass, CnfFormula cnf) {
-		Iterator<Variable> it = cnf.getVariables().iterator();
+		Iterator<Variable> it = allVariables.iterator();
 		while (it.hasNext()) {
 			Variable current = it.next();
 			if (ass.getValue(current) == Tristate.UNDEFINED) {
@@ -145,7 +162,7 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 	 * @return a unused variable or null
 	 */
 	private Variable getNextUnusedVariable(CnfFormula cnfFormula, Assignment assignment) {
-		Iterator<Variable> variableIterator = cnfFormula.getVariables().iterator();
+		Iterator<Variable> variableIterator = allVariables.iterator();
 		while (variableIterator.hasNext()) {
 			Variable currentVariable = variableIterator.next();
 			if (!hasVariableAssigned(currentVariable, assignment)) {
@@ -153,6 +170,7 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 			}
 		}
 
+		
 		return null;
 	}
 
