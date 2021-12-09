@@ -247,7 +247,7 @@ public class BenchmarkRunner {
 								break;
 							case IInitDialogPanel.DPLL_SOLVER:
 								runner.addSolver(i+1+".1 : DPLL-Solver", new DpllSolver());
-								runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
+								//runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
 								
 								break;
 							case IInitDialogPanel.SOLVER_4_STRING:
@@ -384,7 +384,9 @@ public class BenchmarkRunner {
 					// setup runnable thread
 					currentSolver.terminate(false);
 					runnable = new SolverRunnable();
-					runnable.setFormula(formula);
+					CnfFormula newForm=new CnfFormula(formula);
+					//copy constructor
+					runnable.setFormula(newForm);
 					runnable.setSolver(currentSolver);
 					runnable.setRunner(timedRunner);
 					// runnable.setRunner(this.runner);
@@ -427,7 +429,7 @@ public class BenchmarkRunner {
 
 					intermediateResultList.add(timedResult);
 
-					progressBarGui.setNewRunValue(runCounter++);
+					progressBarGui.setNewRunValue(++runCounter);
 
 					if (timeoutDue) {
 						currentSolver.terminate(false);

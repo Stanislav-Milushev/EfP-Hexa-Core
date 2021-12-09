@@ -217,13 +217,11 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 	
 	@Override
 	public void terminate(boolean choice) {
-		// TODO Auto-generated method stub
-		
+		this.terminate=choice;
 	}
 
 	@Override
 	public boolean isTerminated() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.terminate;
 	}
 }
