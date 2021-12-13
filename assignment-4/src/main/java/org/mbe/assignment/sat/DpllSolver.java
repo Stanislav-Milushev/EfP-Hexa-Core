@@ -78,9 +78,12 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 		if (terminate) {
 			return Optional.empty();
 		}
+		
+		CnfFormula tempFormula = new CnfFormula(cnfFormula);
+		Optional<Assignment> assPLE = new PureLiteralElimination(simplifier).ple(tempFormula);
 
-		Optional<Assignment> assPLE = new PureLiteralElimination(simplifier).ple(cnfFormula);
-		Optional<Assignment> assUP = new UnitPropagation(simplifier).up(cnfFormula);
+		tempFormula = new CnfFormula(cnfFormula);
+		Optional<Assignment> assUP = new UnitPropagation(simplifier).up(tempFormula);
 
 		if(!assUP.equals(Optional.empty())) {
 			for (Iterator<Variable> iterator = assUP.get().getVariables().iterator(); iterator.hasNext();) {
@@ -94,7 +97,6 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 				assignment.setValue(variable, assPLE.get().getValue(variable).isTrue());
 			}
 		}
-		
 
 		cnfFormula = simplifier.simplify(cnfFormula, assignment);
 		CnfFormula cnfFormulaSimplified = simplifier.simplify(cnfFormula, assignment);
@@ -109,7 +111,8 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 		Variable nextUnusedVariable = getNextUnusedVariable(cnfFormula, assignment);
 		if (nextUnusedVariable == null) { return Optional.of(assignment); }
 		 
-		Assignment nextTrue = assignment; Assignment nextFalse = cloneAssignment(assignment);
+		Assignment nextTrue = assignment; 
+		Assignment nextFalse = cloneAssignment(assignment);
 		 
 		nextTrue.setValue(nextUnusedVariable, true);
 		nextFalse.setValue(nextUnusedVariable, false);
@@ -185,7 +188,7 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 	private boolean hasVariableAssigned(Variable variable, Assignment assignment) {
 		Iterator<Variable> assignedVariablesIterator = assignment.getVariables().iterator();
 		while (assignedVariablesIterator.hasNext()) {
-			if (assignedVariablesIterator.next() == variable) {
+			if (assignedVariablesIterator.next().equals(variable)) {
 				return true;
 			}
 		}

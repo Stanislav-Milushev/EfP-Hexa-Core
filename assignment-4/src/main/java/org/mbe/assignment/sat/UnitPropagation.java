@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ public class UnitPropagation implements IUnitPropagation<CnfFormula, Assignment>
      * Static logger instance for this class.
      */
     public static final Logger LOG = LoggerFactory.getLogger(UnitPropagation.class);
+    
+    private Set<Variable> allVariables;
 
     private final ISimplifier<CnfFormula, Assignment> simplifier;
 
@@ -42,8 +45,9 @@ public class UnitPropagation implements IUnitPropagation<CnfFormula, Assignment>
      * @return the assignment that contains the values that where set to the variables during UP
      */
     public Optional<Assignment> up(CnfFormula cnfFormula) {
+    	allVariables = cnfFormula.getVariables();
         LOG.trace("Simplifying formula using unit propagation {}", cnfFormula);
-        Set<Variable> variables = DpllSolver.allVariables;
+        Set<Variable> variables = allVariables;
 		Assignment ass = new Assignment();
 		for (Iterator<Variable> iterator = variables.iterator(); iterator.hasNext();) {
 			Variable variable = iterator.next();

@@ -35,6 +35,7 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 	 * The simplifier that is used to eliminate the pure literals in the formula.
 	 */
 	private final ISimplifier<CnfFormula, Assignment> simplifier;
+	private Set<Variable> allVariables;
 
 	/**
 	 * Creates a new instance of the {@link PureLiteralElimination} with the given
@@ -63,10 +64,10 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 	 */
 	public Optional<Assignment> ple(CnfFormula cnfFormula) {
 		LOG.trace("Simplifying formula using pure literal elimination {}", cnfFormula);
-		Set<Variable> variables = DpllSolver.allVariables;
+		allVariables = cnfFormula.getVariables();
 		Assignment ass = new Assignment();
 		//cnfFormula.setOperands(simplifier.simplify(cnfFormula, ass).getOperands());
-		for (Iterator<Variable> varIterator = variables.iterator(); varIterator.hasNext();) {
+		for (Iterator<Variable> varIterator = allVariables.iterator(); varIterator.hasNext();) {
 			Variable variable = varIterator.next();
 			VariableMapping varmap = hasSameFlag(variable, cnfFormula);
 			if (varmap.isValid()) {
@@ -81,6 +82,12 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 		return Optional.of(ass);
 	}
 
+	/**
+	 * Checks if variable always has the same polarity in the formula
+	 * @param var the Variable to check
+	 * @param cnfFormula the formula used
+	 * @return a mapped Object of the variable, if its valid and its polarity
+	 */
 	private VariableMapping hasSameFlag(Variable var, CnfFormula cnfFormula) {
 		boolean polarity = false;
 		boolean initialized = false;
@@ -107,6 +114,9 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 
 }
 
+/**
+ * Helper Class, contains all information needed for the variable
+ */
 class VariableMapping {
 
 	private boolean polarity;
