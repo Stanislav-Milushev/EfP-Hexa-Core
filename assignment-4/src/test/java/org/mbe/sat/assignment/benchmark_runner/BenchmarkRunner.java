@@ -370,14 +370,16 @@ public class BenchmarkRunner {
 				ISolver<CnfFormula, Optional<Assignment>> currentSolver = this.solverMap.get(solverName);
 				ArrayList<TimedResult<Optional<Assignment>>> intermediateResultList = new ArrayList<>();
 
-				int runCounter = 1;
+				int runCounter = 0;
 				progressBarGui.setNewRunValue(runCounter);
 
 				SolverRunnable runnable = null;
 				Thread thread = null;
-
+				
+				boolean skipFirst=true;
+				
 				// capture runtimes for given number of rounds
-				for (int i = 0; i < numberOfRuns; i++) {
+				for (int i = 0; i < (numberOfRuns+1); i++) {
 					TimedResult<Optional<Assignment>> timedResult = null;
 					TimedCnfSolvableRunner timedRunner = new TimedCnfSolvableRunner();
 
@@ -420,14 +422,18 @@ public class BenchmarkRunner {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-
+					
 					timedResult = runnable.getTimedResult();
+					
 					if (timeoutDue) {
 						timedResult = new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0);
-						runCounter = 1;
+						intermediateResultList.add(timedResult);
+						runCounter = 0;
+					}else if(skipFirst){
+						skipFirst=false;
+					}else {
+						intermediateResultList.add(timedResult);
 					}
-
-					intermediateResultList.add(timedResult);
 
 					progressBarGui.setNewRunValue(++runCounter);
 
@@ -437,6 +443,7 @@ public class BenchmarkRunner {
 					}
 				}
 
+				
 				long sumDuration = 0;
 
 				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
@@ -451,6 +458,7 @@ public class BenchmarkRunner {
 
 				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
 						intermediateResultList.get(0).getResult(), finalDuration);
+				
 				this.resultList.add(finalResult);
 			}
 		}

@@ -31,6 +31,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 
 	// values
 
+	private static final double TIMEOUT_VALUE = 0.00001;
 	/**
 	 * maximum number of bars shown in the bar chart at a time
 	 */
@@ -42,7 +43,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * space between two items
 	 */
-	private static final double DEFAULT_ITEM_MARGIN = 0.2;
+	private static final double DEFAULT_ITEM_MARGIN = 0.1;
 	/**
 	 * default font type
 	 */
@@ -316,9 +317,10 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 		// set logarithmic value axis
 		LogAxis logAxis = new LogAxis();
 		logAxis.setLabel(VALUE_AXIS_TEXT);
-		logAxis.setSmallestValue(0.01);
+		logAxis.setSmallestValue(BarChartGui.TIMEOUT_VALUE);
 		this.barChart.getCategoryPlot().setRangeAxis(logAxis);
-
+		//this.barChart.getCategoryPlot().getRangeAxis().setNegativeArrowVisible(true);
+		
 		this.barChart.setAntiAlias(true);
 //		this.barChart.getCategoryPlot().getDomainAxis()
 //				.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6));
@@ -401,7 +403,15 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 				if (valueIndex >= values.length) {
 					break;
 				}
-				dataset.addValue(values[valueIndex++], names[j], categories[this.pointer + i]);
+				
+				if(values[valueIndex]==0) {
+					dataset.addValue(BarChartGui.TIMEOUT_VALUE, names[j], categories[this.pointer+i]);
+				}else {
+					dataset.addValue(values[valueIndex], names[j], categories[this.pointer + i]);
+				}
+				valueIndex++;
+				
+				//dataset.addValue(values[valueIndex++], names[j], categories[this.pointer + i]);
 			}
 		}
 		return dataset;

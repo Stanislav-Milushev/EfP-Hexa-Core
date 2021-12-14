@@ -17,6 +17,13 @@ import javax.swing.event.ChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.awt.Dimension;
+import javax.swing.JButton;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerListModel;
 
 /**
  * @author User Darwin Brambor
@@ -95,6 +102,14 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	 * timeout selected by the user using {@link #timeoutSlider}
 	 */
 	private int timeout;
+	private JPanel panel_5;
+	private JPanel panel_6;
+	private JButton decrementRuns;
+	private JButton incrementRuns;
+	private JButton decrementTimeout;
+	private JButton incrementTimeout;
+	private JPanel panel_7;
+	private JPanel panel_8;
 
 	public enum Difficulty {
 		TRIVIAL, EASY, MEDIUM, HARD, INSANE
@@ -118,7 +133,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	 */
 	public InitDialogPanel() {
 		super();
-		setPreferredSize(new Dimension(400, 300));
+		setPreferredSize(new Dimension(400, 423));
 		setLayout(new GridLayout(4, 0, 0, 0));
 
 		JPanel panel_1 = new JPanel();
@@ -133,17 +148,32 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 			}
 		});
 		difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
+		difficultyCombobox.setSelectedIndex(0);
+		
+		JLabel lblNewLabel_2 = new JLabel("Benchmark Configuration");
+		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel).addGap(18)
-						.addComponent(difficultyCombobox, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap(49, Short.MAX_VALUE)));
-		gl_panel_1.setVerticalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup().addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_1.createSequentialGroup().addGap(30).addComponent(lblNewLabel))
-						.addGroup(gl_panel_1.createSequentialGroup().addGap(26).addComponent(difficultyCombobox,
-								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-						.addContainerGap(27, Short.MAX_VALUE)));
+		gl_panel_1.setHorizontalGroup(
+			gl_panel_1.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel_1.createSequentialGroup()
+							.addComponent(lblNewLabel)
+							.addGap(18)
+							.addComponent(difficultyCombobox, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE))
+						.addComponent(lblNewLabel_2))
+					.addContainerGap(197, Short.MAX_VALUE))
+		);
+		gl_panel_1.setVerticalGroup(
+			gl_panel_1.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_panel_1.createSequentialGroup()
+					.addComponent(lblNewLabel_2)
+					.addPreferredGap(ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+					.addGroup(gl_panel_1.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblNewLabel)
+						.addComponent(difficultyCombobox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGap(21))
+		);
 		panel_1.setLayout(gl_panel_1);
 
 		JPanel panel_2 = new JPanel();
@@ -189,11 +219,11 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 
 		JPanel panel_3 = new JPanel();
 		add(panel_3);
-		panel_3.setLayout(new GridLayout(2, 0, 0, 0));
+		panel_3.setLayout(new GridLayout(3, 0, 0, 0));
 
 		JPanel panel = new JPanel();
 		panel_3.add(panel);
-		panel.setLayout(new GridLayout(0, 2, 0, 0));
+		panel.setLayout(new GridLayout(0, 3, 0, 0));
 
 		JLabel lblNewLabel_1 = new JLabel("Number of runs : ");
 		panel.add(lblNewLabel_1);
@@ -203,27 +233,26 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 
 		runSlider = new JSlider();
 		runSlider.setPaintTicks(true);
-		runSlider.setMaximum(1000);
 		runSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				runValueLabel.setText(runSlider.getValue() + " runs");
 				numberOfRuns = runSlider.getValue();
 			}
 		});
-		runSlider.setValue(10);
+		runSlider.setValue(5);
 		runSlider.setMinorTickSpacing(1);
-		runSlider.setMajorTickSpacing(100);
+		runSlider.setMajorTickSpacing(10);
 		runSlider.setSnapToTicks(true);
 		runSlider.setPaintLabels(true);
 		panel_3.add(runSlider);
 
 		JPanel panel_3_1 = new JPanel();
 		add(panel_3_1);
-		panel_3_1.setLayout(new GridLayout(2, 0, 0, 0));
+		panel_3_1.setLayout(new GridLayout(3, 0, 0, 0));
 
 		JPanel panel_4 = new JPanel();
 		panel_3_1.add(panel_4);
-		panel_4.setLayout(new GridLayout(0, 2, 0, 0));
+		panel_4.setLayout(new GridLayout(0, 3, 0, 0));
 
 		JLabel lblNewLabel_1_1 = new JLabel("Timeout in minutes : ");
 		panel_4.add(lblNewLabel_1_1);
@@ -248,7 +277,53 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		panel_3_1.add(timeoutSlider);
 
 		runValueLabel.setText(runSlider.getValue() + " runs");
+		
+		panel_6 = new JPanel();
+		panel.add(panel_6);
+		panel_6.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		decrementRuns = new JButton("<");
+		decrementRuns.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				runSlider.setValue(runSlider.getValue()==runSlider.getMinimum()?runSlider.getMinimum():(runSlider.getValue()-1));
+			}
+		});
+		panel_6.add(decrementRuns);
+		
+		incrementRuns = new JButton(">");
+		incrementRuns.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				runSlider.setValue(runSlider.getValue()==runSlider.getMaximum()?runSlider.getMaximum():(runSlider.getValue()+1));
+			}
+		});
+		panel_6.add(incrementRuns);
+		
+		panel_7 = new JPanel();
+		panel_3.add(panel_7);
 		timeoutValueLabel.setText(timeoutSlider.getValue() + " minutes");
+		
+		panel_5 = new JPanel();
+		panel_4.add(panel_5);
+		panel_5.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		decrementTimeout = new JButton("<");
+		decrementTimeout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				timeoutSlider.setValue(timeoutSlider.getValue()==timeoutSlider.getMinimum()?timeoutSlider.getMinimum():(timeoutSlider.getValue()-1));
+			}
+		});
+		panel_5.add(decrementTimeout);
+		
+		incrementTimeout = new JButton(">");
+		incrementTimeout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				timeoutSlider.setValue(timeoutSlider.getValue()==timeoutSlider.getMaximum()?timeoutSlider.getMaximum():(timeoutSlider.getValue()+1));
+			}
+		});
+		panel_5.add(incrementTimeout);
+		
+		panel_8 = new JPanel();
+		panel_3_1.add(panel_8);
 
 		this.initValues();
 
@@ -336,12 +411,4 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	public int getTimeout() {
 		return this.timeout;
 	}
-
-//	public static void main(String[] args) {
-//		InitDialogPanel panel = new InitDialogPanel();
-//		JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK", JOptionPane.YES_NO_CANCEL_OPTION,
-//				JOptionPane.INFORMATION_MESSAGE);
-//		
-//		System.out.println("");
-//	}
 }

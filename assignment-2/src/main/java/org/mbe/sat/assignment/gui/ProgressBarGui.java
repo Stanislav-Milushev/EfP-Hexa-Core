@@ -1,6 +1,8 @@
 package org.mbe.sat.assignment.gui;
 
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -75,6 +77,16 @@ public class ProgressBarGui extends JFrame {
 	 */
 	public ProgressBarGui(int maxNumBenchmarks, int maxNumSolvers, int maxNumRuns) {
 
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if(UserCommunication.confirmAction("CONFIRM : STOP EXECUTION", "Wollen Sie die Programmausführung abbrechen?")) {
+					dispose();
+					System.exit(0);
+				}
+			}
+		});
+		
 		this.maxNumBenchmarks = maxNumBenchmarks;
 		this.maxNumSolvers = maxNumSolvers;
 		this.maxNumRuns = maxNumRuns;

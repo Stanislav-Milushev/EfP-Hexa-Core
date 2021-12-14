@@ -216,7 +216,7 @@ public class BenchmarkRunner {
 		// init-dialog
 		IInitDialogPanel panel = new InitDialogPanel();
 		while (true) {
-			int choice = JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK",
+			int choice = JOptionPane.showConfirmDialog(null, panel, "BENCHMARK CONFIG",
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 			if (choice != JOptionPane.YES_OPTION) {
