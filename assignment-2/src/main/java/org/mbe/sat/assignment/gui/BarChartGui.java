@@ -83,11 +83,11 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * number of lines to show an potentially multiline category name
 	 */
-	private static final int DEFAULT_LINES_PER_CATEGORY = 2;
+	private static final int DEFAULT_LINES_PER_CATEGORY = 3;
 	/**
 	 * default axis label font size
 	 */
-	private static final int DEFAULT_AXIS_LABEL_FONT_SIZE = 25;
+	private static final int DEFAULT_AXIS_LABEL_FONT_SIZE = 22;
 	/**
 	 * default font
 	 */

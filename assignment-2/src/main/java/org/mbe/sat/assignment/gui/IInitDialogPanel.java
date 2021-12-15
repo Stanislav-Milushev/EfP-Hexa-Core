@@ -103,4 +103,10 @@ public interface IInitDialogPanel {
 	 */
 	public boolean isRangeIncluded();
 
+	/**
+	 * method shows if the user chose to perform the next benchmark run without timeout limitations
+	 * 
+	 * @return true with timeout / false without timeout
+	 */
+	public boolean isTimeoutEnabled();
 }

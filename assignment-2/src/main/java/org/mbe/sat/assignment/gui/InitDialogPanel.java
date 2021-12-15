@@ -33,6 +33,8 @@ import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 //TODO : add validation for max value
 //TODO : add validation for min value
@@ -154,6 +156,9 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	 * excluded
 	 */
 	private JButton includeExcludeButton;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JRadioButton timeoutEnabledRadioButton;
+	private JRadioButton timeoutDisabledRadioButton;
 
 	/**
 	 * all possible difficulty levels
@@ -188,35 +193,58 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		add(panel_1);
 
 		JPanel panel_9 = new JPanel();
-
-		difficultyCombobox = new JComboBox<Object>();
-		difficultyCombobox.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				diff = (Difficulty) difficultyCombobox.getSelectedItem();
-			}
-		});
 		panel_1.setLayout(new GridLayout(0, 2, 0, 0));
-		difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
-		difficultyCombobox.setSelectedIndex(0);
 
 		JLabel lblNewLabel_2 = new JLabel("Benchmark Configuration");
 		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-
-		JLabel lblNewLabel = new JLabel("Difficulty");
+		
+		JPanel panel_13 = new JPanel();
+		
+		JPanel panel_14 = new JPanel();
 		GroupLayout gl_panel_9 = new GroupLayout(panel_9);
-		gl_panel_9.setHorizontalGroup(gl_panel_9.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_9.createSequentialGroup().addComponent(lblNewLabel_2).addGap(45))
-				.addGroup(Alignment.TRAILING, gl_panel_9.createSequentialGroup().addComponent(lblNewLabel)
-						.addPreferredGap(ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
-						.addComponent(difficultyCombobox, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap()));
-		gl_panel_9.setVerticalGroup(gl_panel_9.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_9.createSequentialGroup().addComponent(lblNewLabel_2).addGap(25)
-						.addGroup(gl_panel_9.createParallelGroup(Alignment.BASELINE)
-								.addComponent(difficultyCombobox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblNewLabel))
-						.addContainerGap(43, Short.MAX_VALUE)));
+		gl_panel_9.setHorizontalGroup(
+			gl_panel_9.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel_9.createSequentialGroup()
+					.addGroup(gl_panel_9.createParallelGroup(Alignment.TRAILING)
+						.addComponent(panel_14, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(panel_13, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+						.addComponent(lblNewLabel_2, Alignment.LEADING))
+					.addContainerGap())
+		);
+		gl_panel_9.setVerticalGroup(
+			gl_panel_9.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_9.createSequentialGroup()
+					.addComponent(lblNewLabel_2)
+					.addGap(18)
+					.addComponent(panel_13, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(panel_14, GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+					.addContainerGap())
+		);
+		panel_14.setLayout(new GridLayout(0, 2, 0, 0));
+		
+		timeoutEnabledRadioButton = new JRadioButton("Timeout enabled");
+		timeoutEnabledRadioButton.setSelected(true);
+		buttonGroup.add(timeoutEnabledRadioButton);
+		panel_14.add(timeoutEnabledRadioButton);
+		
+		timeoutDisabledRadioButton = new JRadioButton("Timeout disabled");
+		buttonGroup.add(timeoutDisabledRadioButton);
+		panel_14.add(timeoutDisabledRadioButton);
+						panel_13.setLayout(new GridLayout(0, 2, 0, 0));
+				
+						JLabel lblNewLabel = new JLabel("Difficulty");
+						panel_13.add(lblNewLabel);
+		
+				difficultyCombobox = new JComboBox<Object>();
+				panel_13.add(difficultyCombobox);
+				difficultyCombobox.addPropertyChangeListener(new PropertyChangeListener() {
+					public void propertyChange(PropertyChangeEvent evt) {
+						diff = (Difficulty) difficultyCombobox.getSelectedItem();
+					}
+				});
+				difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
+				difficultyCombobox.setSelectedIndex(0);
 		panel_9.setLayout(gl_panel_9);
 		panel_1.add(panel_9);
 
@@ -602,5 +630,13 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	@Override
 	public boolean isRangeIncluded() {
 		return this.include;
+	}
+
+	/**
+	 *{@inheritDoc}
+	 */
+	@Override
+	public boolean isTimeoutEnabled() {
+		return this.timeoutEnabledRadioButton.isSelected();
 	}
 }

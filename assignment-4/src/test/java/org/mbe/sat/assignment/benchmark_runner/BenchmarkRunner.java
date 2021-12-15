@@ -178,6 +178,7 @@ public class BenchmarkRunner {
 	 * true if the user wants to include the specified selection / false if the user wants to exclude the specified selection
 	 */
 	private static boolean include;
+	private static boolean timeoutEnabled;
 	/**
 	 * runs the {@link #solver}
 	 */
@@ -364,7 +365,7 @@ public class BenchmarkRunner {
 			UserCommunication.errorDialog("INVALID INPUT", errorMessageBuilder.toString());
 		}
 
-		//
+		//begin insert
 
 		panelSelectionActive = panel.isSelectionActive();
 
@@ -377,8 +378,10 @@ public class BenchmarkRunner {
 			minVal = 1;
 			maxVal = Integer.MAX_VALUE;
 		}
+		
+		timeoutEnabled=panel.isTimeoutEnabled();
 
-		//
+		//end insert
 
 		try {
 			runner.runBenchmark();
@@ -574,11 +577,12 @@ public class BenchmarkRunner {
 					long timestamp = System.currentTimeMillis();
 
 					while (true) {
-						if ((System.currentTimeMillis() - timestamp) > (timeout * 60 * 1000)) {
-							timeoutDue = true;
-							break;
+						if (timeoutEnabled) {
+							if ((System.currentTimeMillis() - timestamp) > (timeout * 60 * 1000)) {
+								timeoutDue = true;
+								break;
+							} 
 						}
-
 						if (!thread.isAlive()) {
 							System.out.println("Thread not alive");
 							break;
