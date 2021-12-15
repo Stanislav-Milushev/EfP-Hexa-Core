@@ -67,4 +67,40 @@ public interface IInitDialogPanel {
 	 *         duration is larger than 0, returns false otherwise)
 	 */
 	public boolean validateTimeout();
+
+	/**
+	 * method returns minimal number of variables a benchmark file is allowed to
+	 * have in the following
+	 * 
+	 * @return minimal number of variables selected by the user
+	 */
+	public int getMinNumOfVariables();
+
+	/**
+	 * method returns minimal number of variables a benchmark file is allowed to
+	 * have in the following
+	 * 
+	 * @return minimal number of variables selected by the user
+	 */
+	public int getMaxNumOfVariables();
+
+	/**
+	 * method returns the users choice to only consider benchmark files with an user
+	 * defined number of variables in the following
+	 * 
+	 * @return true if the user wants to specify a range of variables in the
+	 *         benchmark file more specificly
+	 */
+	public boolean isSelectionActive();
+
+	/**
+	 * method returns the users choice to include or exclude all of the benchmark
+	 * files with a specific number of variables of the selected range
+	 * 
+	 * @return true if the selected range shall be included into the test run /
+	 *         false if the remaining range without the specified one shall be
+	 *         included in the following
+	 */
+	public boolean isRangeIncluded();
+
 }

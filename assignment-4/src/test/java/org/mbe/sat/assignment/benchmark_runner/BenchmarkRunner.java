@@ -35,17 +35,48 @@ import org.mbe.sat.impl.BaseSolver;
  *
  */
 
+
+/**
+ * runnable implementation to enable the benchmark to be interrupted
+ */
 class SolverRunnable implements Runnable {
 
+	/**
+	 * result of the solving process
+	 */
 	private TimedResult<Optional<Assignment>> timedResult;
+	/**
+	 * runner to measure the required time for the solving process
+	 */
 	private TimedCnfSolvableRunner runner;
+	/**
+	 * sat solver
+	 */
 	private ISolver<CnfFormula, Optional<Assignment>> solver;
+	/**
+	 * formula that shall be solved by the {@link #solver} to obtain a runtime measurement from the {@link #runner}
+	 */
 	private CnfFormula formula;
+	/**
+	 * control flag to state the validity of the {@link #runner} instance
+	 */
 	private boolean runnerValid = false;
+	/**
+	 * control flag to state the validity of the {@link #solver} instance
+	 */
 	private boolean solverValid = false;
+	/**
+	 * control flag to state the validity of the {@link #formula} instance
+	 */
 	private boolean formulaValid = false;
+	/**
+	 * control flag to reflect the status of the current execution
+	 */
 	private boolean finished = false;
 
+	/**
+	 *{@inheritDoc}
+	 */
 	@Override
 	public void run() {
 		if (validate()) {
@@ -54,6 +85,10 @@ class SolverRunnable implements Runnable {
 		// this.finished=true;
 	}
 
+	/**
+	 * method gives access to the finished or interrupted results of the solving process
+	 * @return {@link #timedResult}
+	 */
 	public TimedResult<Optional<Assignment>> getTimedResult() {
 		if (this.timedResult == null) {
 			return new TimedResult<Optional<Assignment>>(Optional.empty(), 0);
@@ -61,6 +96,10 @@ class SolverRunnable implements Runnable {
 		return this.timedResult;
 	}
 
+	/**
+	 * method sets the value of the attribute {@link #runner}
+	 * @param runner
+	 */
 	public void setRunner(TimedCnfSolvableRunner runner) {
 		if (runner != null) {
 			this.runner = runner;
@@ -68,6 +107,10 @@ class SolverRunnable implements Runnable {
 		}
 	}
 
+	/**
+	 * method sets the value of the attribute {@link #solver}
+	 * @param solver
+	 */
 	public void setSolver(ISolver<CnfFormula, Optional<Assignment>> solver) {
 		if (solver != null) {
 			this.solver = solver;
@@ -75,6 +118,10 @@ class SolverRunnable implements Runnable {
 		}
 	}
 
+	/**
+	 * method sets the value of the attribute {@link #formula}
+	 * @param formula
+	 */
 	public void setFormula(CnfFormula formula) {
 		if (formula != null) {
 			this.formula = formula;
@@ -82,23 +129,55 @@ class SolverRunnable implements Runnable {
 		}
 	}
 
+	/**
+	 * method evaluates all available validation flags before the execution begins
+	 * @return true if all validation flags are set to true
+	 */
 	public boolean validate() {
 		return (this.runnerValid && this.formulaValid && this.solverValid);
 	}
 
+	/**
+	 * method gives feedback about the state of the current execution
+	 * @return true if the current execution of {@link #run()} finished
+	 */
 	public boolean isFinished() {
 		return finished;
 	}
 
+	/**
+	 * method enabled terminating the solving process preemptively
+	 * @param choice / if true nothing happens / if false the execution gets interrupted
+	 */
 	public void terminate(boolean choice) {
 		this.solver.terminate(choice);
 	}
 
 }
 
+
 public class BenchmarkRunner {
 
+	/**
+	 * factor used later on to provide more accurate result values 
+	 */
 	private static final int FACTOR = 100;
+	/**
+	 * true if the user chose to specify a number of benchmark files according to their number of variables
+	 */
+	private static boolean panelSelectionActive;
+	/**
+	 * by default 0 / if the {@link #panelSelectionActive} flag is set to true, it stores the user defined lower bound instead
+	 */
+	private static int minVal;
+	/**
+	 * by default {@link Integer#MAX_VALUE} / if the {@link #panelSelectionActive} flag is set to true, it stores the user defined upper bound instead
+	 */
+	private static int maxVal;
+	/**
+	 * true if the user wants to include the specified selection / false if the user wants to exclude the specified selection
+	 */
+	private static boolean include;
 	/**
 	 * runs the {@link #solver}
 	 */
@@ -217,6 +296,10 @@ public class BenchmarkRunner {
 
 		// init-dialog
 		IInitDialogPanel panel = new InitDialogPanel();
+
+		// additionally : choose range of variables => therefore find out min / max
+		// number of variables of each difficulty beforehand
+
 		while (true) {
 			int choice = JOptionPane.showConfirmDialog(null, panel, "CONFIGURE BENCHMARK",
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -239,16 +322,16 @@ public class BenchmarkRunner {
 							switch (panel.getSelectedSolvers().get(i)) {
 							case IInitDialogPanel.BASE_SOLVER_STRING:
 								runner.addSolver(i + 1 + " : Base-Solver", new BaseSolver());
-								//runner.addSolver(i + 1 + ".2 : Base-Solver", new BaseSolver());
+								// runner.addSolver(i + 1 + ".2 : Base-Solver", new BaseSolver());
 								break;
 							case IInitDialogPanel.DP_SOLVER_STRING:
 								runner.addSolver(i + 1 + " : DP-Solver", new DpSolver());
-								//runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
+								// runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.DPLL_SOLVER:
-								runner.addSolver(i+1+".1 : DPLL-Solver", new DpllSolver());
-								//runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
-								
+								runner.addSolver(i + 1 + ".1 : DPLL-Solver", new DpllSolver());
+								// runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
+
 								break;
 							case IInitDialogPanel.SOLVER_4_STRING:
 								break;
@@ -281,10 +364,26 @@ public class BenchmarkRunner {
 			UserCommunication.errorDialog("INVALID INPUT", errorMessageBuilder.toString());
 		}
 
+		//
+
+		panelSelectionActive = panel.isSelectionActive();
+
+		if (panelSelectionActive) {
+			include = panel.isRangeIncluded();
+			minVal = panel.getMinNumOfVariables();
+			maxVal = panel.getMaxNumOfVariables();
+		} else {
+			include=true;
+			minVal = 1;
+			maxVal = Integer.MAX_VALUE;
+		}
+
+		//
+
 		try {
 			runner.runBenchmark();
 		} catch (NullPointerException | EmptyChartInputException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
@@ -303,52 +402,129 @@ public class BenchmarkRunner {
 		this.factory.showGui();
 	}
 
+	/**
+	 * performs setup steps
+	 * 
+	 * @throws NullPointerException
+	 * @throws EmptyChartInputException
+	 */
 	public void setup() throws NullPointerException, EmptyChartInputException {
 		String benchmarkType = null;
 
 		switch (this.difficulty) {
 		case TRIVIAL:
-			// get/sort required benchmark files
-			this.jsonModels = SatProblemFixtures.getTrivial().stream()
-					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-					.collect(Collectors.toList());
-			benchmarkType = "TRIVIAL";
+			if (include) {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getTrivial().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
+								&& s1.getFormula().getVariables().size() <= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "TRIVIAL";
+			} else {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getTrivial().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
+								|| s1.getFormula().getVariables().size() >= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "TRIVIAL";
+			}
 			break;
 
 		case EASY:
-			// get/sort required benchmark files
-			this.jsonModels = SatProblemFixtures.getEasy().stream()
-					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-					.collect(Collectors.toList());
-			benchmarkType = "EASY";
+			if (include) {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getEasy().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
+								&& s1.getFormula().getVariables().size() <= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "EASY";
+			} else {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getEasy().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
+								|| s1.getFormula().getVariables().size() >= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "EASY";
+			}
 			break;
 
 		case MEDIUM:
-			// get/sort required benchmark files
-			this.jsonModels = SatProblemFixtures.getMedium().stream()
-					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-					.collect(Collectors.toList());
-			benchmarkType = "MEDIUM";
+
+			if (include) {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getMedium().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
+								&& s1.getFormula().getVariables().size() <= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "MEDIUM";
+			} else {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getMedium().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
+								|| s1.getFormula().getVariables().size() >= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "MEDIUM";
+			}
+
 			break;
 
 		case HARD:
-			// get/sort required benchmark files
-			this.jsonModels = SatProblemFixtures.getHard().stream()
-					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-					.collect(Collectors.toList());
-			benchmarkType = "HARD";
+
+			if (include) {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getHard().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
+								&& s1.getFormula().getVariables().size() <= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "HARD";
+			} else {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getHard().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
+								|| s1.getFormula().getVariables().size() >= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "HARD";
+			}
+
 			break;
 
 		case INSANE:
-			// get/sort required benchmark files
-			this.jsonModels = SatProblemFixtures.getInsane().stream()
-					.sorted((s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
-					.collect(Collectors.toList());
-			benchmarkType = "INSANE";
+
+			if (include) {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getInsane().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
+								&& s1.getFormula().getVariables().size() <= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "INSANE";
+			} else {
+				// get/sort required benchmark files
+				this.jsonModels = SatProblemFixtures.getInsane().stream().sorted(
+						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
+						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
+								|| s1.getFormula().getVariables().size() >= maxVal))
+						.collect(Collectors.toList());
+				benchmarkType = "INSANE";
+			}
+
 			break;
 		}
 
 		//////////////////////////////
+		if (jsonModels.size() == 0) {
+			UserCommunication.errorDialog("ERROR : EMPTY RANGE",
+					"Error : the user specified range of variables does not include any benchmark files!");
+			System.exit(0);
+		}
 		ProgressBarGui progressBarGui = new ProgressBarGui(jsonModels.size(), solverMap.size(), numberOfRuns);
 		//////////////////////////////
 		int modelCounter = 1;
@@ -375,19 +551,19 @@ public class BenchmarkRunner {
 
 				SolverRunnable runnable = null;
 				Thread thread = null;
-				
-				boolean skipFirst=true;
-				
+
+				boolean skipFirst = true;
+
 				// capture runtimes for given number of rounds
-				for (int i = 0; i < (numberOfRuns+1); i++) {
+				for (int i = 0; i < (numberOfRuns + 1); i++) {
 					TimedResult<Optional<Assignment>> timedResult = null;
 					TimedCnfSolvableRunner timedRunner = new TimedCnfSolvableRunner();
 
 					// setup runnable thread
 					currentSolver.terminate(false);
 					runnable = new SolverRunnable();
-					CnfFormula newForm=new CnfFormula(formula);
-					//copy constructor
+					CnfFormula newForm = new CnfFormula(formula);
+					// copy constructor
 					runnable.setFormula(newForm);
 					runnable.setSolver(currentSolver);
 					runnable.setRunner(timedRunner);
@@ -410,7 +586,7 @@ public class BenchmarkRunner {
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
+
 							e.printStackTrace();
 						}
 					}
@@ -419,19 +595,19 @@ public class BenchmarkRunner {
 					try {
 						thread.join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
-					
+
 					timedResult = runnable.getTimedResult();
-					
+
 					if (timeoutDue) {
 						timedResult = new TimedResult<Optional<Assignment>>(timedResult.getResult(), 0);
 						intermediateResultList.add(timedResult);
 						runCounter = 0;
-					}else if(skipFirst){
-						skipFirst=false;
-					}else {
+					} else if (skipFirst) {
+						skipFirst = false;
+					} else {
 						intermediateResultList.add(timedResult);
 					}
 
@@ -443,7 +619,6 @@ public class BenchmarkRunner {
 					}
 				}
 
-				
 				long sumDuration = 0;
 
 				for (Iterator<TimedResult<Optional<Assignment>>> resultListIterator = intermediateResultList
@@ -458,7 +633,7 @@ public class BenchmarkRunner {
 
 				TimedResult<Optional<Assignment>> finalResult = new TimedResult<Optional<Assignment>>(
 						intermediateResultList.get(0).getResult(), finalDuration);
-				
+
 				this.resultList.add(finalResult);
 			}
 		}
@@ -478,10 +653,14 @@ public class BenchmarkRunner {
 		for (Iterator<SatProblemJsonModel> iterator = jsonModels.iterator(); iterator.hasNext();) {
 			SatProblemJsonModel model = (SatProblemJsonModel) iterator.next();
 			StringBuilder builder = new StringBuilder();
+			builder.append("Filename : ");
 			builder.append(model.getFileName());
 			builder.append("\n");
-			builder.append("VARIABLES:");
+			builder.append(" Number of variables : ");
 			builder.append(model.getFormula().getVariables().size());
+			builder.append("\n");
+			builder.append(" Solvable : ");
+			builder.append(model.isSatisfiable());
 			// builder.append(" | \n");
 			categories[counter++] = builder.toString();
 		}
@@ -493,11 +672,15 @@ public class BenchmarkRunner {
 			values[counter++] = ((double) result.getDurationInMilliseconds() / (double) BenchmarkRunner.FACTOR);
 		}
 
-		// pass parameters to BarChartFactory
-		this.factory.setChartTitle(benchmarkType + " Benchmark : " + numberOfRuns + " runs");
-		this.factory.setNames(names);
-		this.factory.setCategories(categories);
-		this.factory.setValues(values);
+		try {
+			// pass parameters to BarChartFactory
+			this.factory.setChartTitle(benchmarkType + " Benchmark : " + numberOfRuns + " runs");
+			this.factory.setNames(names);
+			this.factory.setCategories(categories);
+			this.factory.setValues(values);
+		} catch (NullPointerException | EmptyChartInputException e) {
+			e.printStackTrace();
+		}
 
 		progressBarGui.close();
 	}

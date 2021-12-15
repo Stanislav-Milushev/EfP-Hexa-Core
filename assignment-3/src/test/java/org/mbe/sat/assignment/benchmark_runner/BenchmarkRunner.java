@@ -279,7 +279,7 @@ public class BenchmarkRunner {
 		try {
 			runner.runBenchmark();
 		} catch (NullPointerException | EmptyChartInputException e) {
-			// TODO Auto-generated catch block
+			// 
 			e.printStackTrace();
 		}
 
@@ -401,7 +401,7 @@ public class BenchmarkRunner {
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
+							// 
 							e.printStackTrace();
 						}
 					}
@@ -410,7 +410,7 @@ public class BenchmarkRunner {
 					try {
 						thread.join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						// 
 						e.printStackTrace();
 					}
 
