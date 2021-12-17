@@ -47,8 +47,9 @@ public class UnitPropagation implements IUnitPropagation<CnfFormula, Assignment>
     public Optional<Assignment> up(CnfFormula cnfFormula) {
     	allVariables = cnfFormula.getVariables();
         LOG.trace("Simplifying formula using unit propagation {}", cnfFormula);
-        Set<Variable> variables = allVariables;
 		Assignment ass = new Assignment();
+		// OLD
+		/*
 		for (Iterator<Variable> iterator = variables.iterator(); iterator.hasNext();) {
 			Variable variable = iterator.next();
 			for (Iterator<Or<Atom>> opIterator = cnfFormula.getOperands().iterator(); opIterator.hasNext();) {
@@ -64,7 +65,22 @@ public class UnitPropagation implements IUnitPropagation<CnfFormula, Assignment>
 					}
 				}
 			}
+		}*/
+		//NEW
+		boolean formulaChanged = true;
+		while(formulaChanged) {
+			formulaChanged = false;
+			for (Iterator<Or<Atom>> opIterator = cnfFormula.getOperands().iterator(); opIterator.hasNext();) {
+				Or<Atom> clause = opIterator.next();
+				if(clause.getLiterals().size() == 1) {
+					Literal singleLiteral = clause.getLiterals().stream().findFirst().get();
+					ass.setValue(singleLiteral.getVariable(), singleLiteral.isPositive());
+					cnfFormula.setOperands(simplifier.simplify(cnfFormula, ass).getOperands());
+					formulaChanged = true;
+				}
+			}
 		}
+		
 		
 		if(ass.getVariables().isEmpty()) {
 	        return Optional.empty();
