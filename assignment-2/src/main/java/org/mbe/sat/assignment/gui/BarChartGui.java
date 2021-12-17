@@ -83,7 +83,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * number of lines to show an potentially multiline category name
 	 */
-	private static final int DEFAULT_LINES_PER_CATEGORY = 3;
+	private static final int DEFAULT_LINES_PER_CATEGORY = 5;
 	/**
 	 * default axis label font size
 	 */
@@ -405,7 +405,7 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 				}
 				
 				if(values[valueIndex]==0) {
-					dataset.addValue(BarChartGui.TIMEOUT_VALUE, names[j], categories[this.pointer+i]);
+					dataset.addValue(0, names[j], categories[this.pointer+i]);
 				}else {
 					dataset.addValue(values[valueIndex], names[j], categories[this.pointer + i]);
 				}
