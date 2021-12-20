@@ -26,11 +26,13 @@ public class DpllSolver extends AbstractDpSolver {
     protected final ISimplifier<CnfFormula, Assignment> simplifier;
     protected final IUnitPropagation<CnfFormula, Assignment> unitPropagation;
     protected final IPureLiteralElimination<CnfFormula, Assignment> pureLiteralElimination;
-
+    private boolean terminate;
+    
     public DpllSolver() {
         this.simplifier = new SolutionSimplifier();
         this.unitPropagation = new BatchedUnitPropagation(simplifier);
         this.pureLiteralElimination = new BatchedPureLiteralElimination(simplifier);
+        this.terminate=false;
     }
 
     /**
@@ -56,7 +58,7 @@ public class DpllSolver extends AbstractDpSolver {
         // can no longer perform any simplification.
         boolean shouldContinue = true;
 
-        while (shouldContinue) {
+        while (shouldContinue && !terminate) {
             shouldContinue = false;
 
             // When using unit propagation we must remember the assignment for the unit clauses that where propagated.
@@ -78,4 +80,14 @@ public class DpllSolver extends AbstractDpSolver {
 
         return simplifiedCnfFormula;
     }
+
+	@Override
+	public void terminate(boolean choice) {
+		this.terminate=choice;
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return this.terminate;
+	}
 }
