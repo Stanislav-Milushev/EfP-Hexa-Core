@@ -7,6 +7,7 @@ import org.mbe.sat.core.model.formula.Atom;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.model.formula.Literal;
 import org.mbe.sat.core.model.formula.Or;
+import org.mbe.sat.core.model.formula.Tristate;
 import org.mbe.sat.core.model.formula.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,9 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 		LOG.trace("Simplifying formula using pure literal elimination {}", cnfFormula);
 		allVariables = cnfFormula.getVariables();
 		Assignment ass = new Assignment();
+		// OLD
 		//cnfFormula.setOperands(simplifier.simplify(cnfFormula, ass).getOperands());
+		/*
 		for (Iterator<Variable> varIterator = allVariables.iterator(); varIterator.hasNext();) {
 			Variable variable = varIterator.next();
 			VariableMapping varmap = hasSameFlag(variable, cnfFormula);
@@ -74,14 +77,65 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 				ass.setValue(variable, varmap.getPolarity());
 				cnfFormula.setOperands(simplifier.simplify(cnfFormula, ass).getOperands());
 			}
-		}
-		if (ass.getVariables().isEmpty()) {
-			return Optional.empty();
+		}*/
+		
+		// NEW
+		boolean hasChanged = true;
+		while(hasChanged) {
+			hasChanged = false;
+			HashMap<Variable,Tristate> map=new HashMap<>();
+	        for (Iterator<Literal> literator = cnfFormula.getLiterals().iterator(); literator.hasNext();) {
+	            Literal literal=literator.next();
+	            Variable variable=literal.getVariable();
+
+	            Tristate result=map.get(variable);
+
+	            if(result!=null) {
+	                switch (result) {
+	                case UNDEFINED:
+	                    break;
+
+	                case FALSE:
+	                    if(literal.getPolarity().isPositive()) {
+	                        map.put(variable, Tristate.UNDEFINED);
+	                    }
+	                    break;
+
+	                case TRUE:
+	                    if(literal.getPolarity().isNegative()) {
+	                        map.put(variable, Tristate.UNDEFINED);
+	                    }
+	                    break;
+	                }
+	            }else {
+	                if(literal.getPolarity().isPositive()) {
+	                    map.put(variable, Tristate.TRUE);
+	                }else {
+	                    map.put(variable, Tristate.FALSE);
+	                }
+	            }
+	        }
+
+	        for (Iterator<Variable> mapIterator = map.keySet().iterator(); mapIterator.hasNext();) {
+	            Variable variable = (Variable) mapIterator.next();
+	            Tristate state=map.get(variable);
+
+	            if(!state.equals(Tristate.UNDEFINED)) {
+	                ass.setValue(variable, state.isTrue());
+	                cnfFormula.setOperands(simplifier.simplify(cnfFormula, ass).getOperands());
+	                hasChanged = true;
+	            }
+	        }
 		}
 
-		return Optional.of(ass);
+        if (ass.getVariables().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(ass);
 	}
 
+	// OLD
 	/**
 	 * Checks if variable always has the same polarity in the formula
 	 * @param var the Variable to check
@@ -110,10 +164,12 @@ public class PureLiteralElimination implements IPureLiteralElimination<CnfFormul
 			}
 		}
 		return new VariableMapping(polarity, initialized);
+		
 	}
 
 }
 
+// OLD
 /**
  * Helper Class, contains all information needed for the variable
  */
