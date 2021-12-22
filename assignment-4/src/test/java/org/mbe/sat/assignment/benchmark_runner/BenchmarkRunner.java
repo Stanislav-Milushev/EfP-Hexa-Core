@@ -179,6 +179,7 @@ public class BenchmarkRunner {
 	 */
 	private static boolean include;
 	private static boolean timeoutEnabled;
+	private static long numberOfFiles;
 	/**
 	 * runs the {@link #solver}
 	 */
@@ -330,9 +331,16 @@ public class BenchmarkRunner {
 								// runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.DPLL_SOLVER:
-								runner.addSolver(i + 1 + ".1 : DPLL-Solver", new DpllSolver());
-								// runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
+								DpllSolver oldSolver=new DpllSolver();
+								DpllSolver newSolver=new DpllSolver();
+								oldSolver.setOldVersion(true);
+								newSolver.setOldVersion(false);
+								runner.addSolver(i + 1 + ".1 / OLD  : DPLL-Solver", oldSolver);
+								runner.addSolver(i+1+".2 /  NEW  : DPLL-Solver", newSolver);
 
+//								runner.addSolver(i + 1 + ".1 /  OLD  : DPLL-Solver", new DpllSolver());
+//								runner.addSolver(i+1+".2 / NEW  : DPLL-Solver", new DpllSolver());
+								
 								break;
 							case IInitDialogPanel.SOLVER_4_STRING:
 								break;
@@ -379,6 +387,7 @@ public class BenchmarkRunner {
 			maxVal = Integer.MAX_VALUE;
 		}
 		
+		numberOfFiles=panel.getMaxNumOfFiles();
 		timeoutEnabled=panel.isTimeoutEnabled();
 
 		//end insert
@@ -414,6 +423,10 @@ public class BenchmarkRunner {
 	public void setup() throws NullPointerException, EmptyChartInputException {
 		String benchmarkType = null;
 
+		if(numberOfFiles==0) {
+			numberOfFiles=Long.MAX_VALUE;
+		}
+		
 		switch (this.difficulty) {
 		case TRIVIAL:
 			if (include) {
@@ -421,7 +434,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getTrivial().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
-								&& s1.getFormula().getVariables().size() <= maxVal))
+								&& s1.getFormula().getVariables().size() <= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "TRIVIAL";
 			} else {
@@ -429,7 +442,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getTrivial().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
-								|| s1.getFormula().getVariables().size() >= maxVal))
+								|| s1.getFormula().getVariables().size() >= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "TRIVIAL";
 			}
@@ -441,7 +454,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getEasy().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
-								&& s1.getFormula().getVariables().size() <= maxVal))
+								&& s1.getFormula().getVariables().size() <= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "EASY";
 			} else {
@@ -449,7 +462,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getEasy().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
-								|| s1.getFormula().getVariables().size() >= maxVal))
+								|| s1.getFormula().getVariables().size() >= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "EASY";
 			}
@@ -462,7 +475,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getMedium().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
-								&& s1.getFormula().getVariables().size() <= maxVal))
+								&& s1.getFormula().getVariables().size() <= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "MEDIUM";
 			} else {
@@ -470,7 +483,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getMedium().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
-								|| s1.getFormula().getVariables().size() >= maxVal))
+								|| s1.getFormula().getVariables().size() >= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "MEDIUM";
 			}
@@ -484,7 +497,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getHard().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
-								&& s1.getFormula().getVariables().size() <= maxVal))
+								&& s1.getFormula().getVariables().size() <= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "HARD";
 			} else {
@@ -492,7 +505,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getHard().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
-								|| s1.getFormula().getVariables().size() >= maxVal))
+								|| s1.getFormula().getVariables().size() >= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "HARD";
 			}
@@ -506,7 +519,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getInsane().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() >= minVal
-								&& s1.getFormula().getVariables().size() <= maxVal))
+								&& s1.getFormula().getVariables().size() <= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "INSANE";
 			} else {
@@ -514,7 +527,7 @@ public class BenchmarkRunner {
 				this.jsonModels = SatProblemFixtures.getInsane().stream().sorted(
 						(s1, s2) -> s1.getFormula().getVariables().size() - s2.getFormula().getVariables().size())
 						.filter((s1) -> (s1.getFormula().getVariables().size() <= minVal
-								|| s1.getFormula().getVariables().size() >= maxVal))
+								|| s1.getFormula().getVariables().size() >= maxVal)).limit(numberOfFiles)
 						.collect(Collectors.toList());
 				benchmarkType = "INSANE";
 			}

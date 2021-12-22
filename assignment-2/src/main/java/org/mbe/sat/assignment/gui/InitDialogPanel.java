@@ -159,6 +159,8 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JRadioButton timeoutEnabledRadioButton;
 	private JRadioButton timeoutDisabledRadioButton;
+	private JSlider fileSlider;
+	protected int numberOfFiles;
 
 	/**
 	 * all possible difficulty levels
@@ -179,6 +181,7 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		this.numberOfRuns = this.runSlider.getValue();
 		this.timeout = this.timeoutSlider.getValue();
 		this.include = true;
+		this.numberOfFiles=this.fileSlider.getValue();
 	}
 
 	/**
@@ -186,8 +189,8 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	 */
 	public InitDialogPanel() {
 		super();
-		setPreferredSize(new Dimension(435, 423));
-		setLayout(new GridLayout(4, 0, 0, 0));
+		setPreferredSize(new Dimension(435, 504));
+		setLayout(new GridLayout(5, 0, 0, 0));
 
 		JPanel panel_1 = new JPanel();
 		add(panel_1);
@@ -197,54 +200,46 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 
 		JLabel lblNewLabel_2 = new JLabel("Benchmark Configuration");
 		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		
+
 		JPanel panel_13 = new JPanel();
-		
+
 		JPanel panel_14 = new JPanel();
 		GroupLayout gl_panel_9 = new GroupLayout(panel_9);
-		gl_panel_9.setHorizontalGroup(
-			gl_panel_9.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel_9.createSequentialGroup()
-					.addGroup(gl_panel_9.createParallelGroup(Alignment.TRAILING)
-						.addComponent(panel_14, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+		gl_panel_9.setHorizontalGroup(gl_panel_9.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel_9.createSequentialGroup().addGroup(gl_panel_9.createParallelGroup(Alignment.TRAILING)
+						.addComponent(panel_14, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE)
 						.addComponent(panel_13, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-						.addComponent(lblNewLabel_2, Alignment.LEADING))
-					.addContainerGap())
-		);
-		gl_panel_9.setVerticalGroup(
-			gl_panel_9.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_9.createSequentialGroup()
-					.addComponent(lblNewLabel_2)
-					.addGap(18)
-					.addComponent(panel_13, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panel_14, GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
-					.addContainerGap())
-		);
+						.addComponent(lblNewLabel_2, Alignment.LEADING)).addContainerGap()));
+		gl_panel_9.setVerticalGroup(gl_panel_9.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_9.createSequentialGroup().addComponent(lblNewLabel_2).addGap(18)
+						.addComponent(panel_13, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panel_14, GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE).addContainerGap()));
 		panel_14.setLayout(new GridLayout(0, 2, 0, 0));
-		
+
 		timeoutEnabledRadioButton = new JRadioButton("Timeout enabled");
 		timeoutEnabledRadioButton.setSelected(true);
 		buttonGroup.add(timeoutEnabledRadioButton);
 		panel_14.add(timeoutEnabledRadioButton);
-		
+
 		timeoutDisabledRadioButton = new JRadioButton("Timeout disabled");
 		buttonGroup.add(timeoutDisabledRadioButton);
 		panel_14.add(timeoutDisabledRadioButton);
-						panel_13.setLayout(new GridLayout(0, 2, 0, 0));
-				
-						JLabel lblNewLabel = new JLabel("Difficulty");
-						panel_13.add(lblNewLabel);
-		
-				difficultyCombobox = new JComboBox<Object>();
-				panel_13.add(difficultyCombobox);
-				difficultyCombobox.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						diff = (Difficulty) difficultyCombobox.getSelectedItem();
-					}
-				});
-				difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
-				difficultyCombobox.setSelectedIndex(0);
+		panel_13.setLayout(new GridLayout(0, 2, 0, 0));
+
+		JLabel lblNewLabel = new JLabel("Difficulty");
+		panel_13.add(lblNewLabel);
+
+		difficultyCombobox = new JComboBox<Object>();
+		panel_13.add(difficultyCombobox);
+		difficultyCombobox.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				diff = (Difficulty) difficultyCombobox.getSelectedItem();
+			}
+		});
+		difficultyCombobox.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
+		difficultyCombobox.setSelectedIndex(0);
 		panel_9.setLayout(gl_panel_9);
 		panel_1.add(panel_9);
 
@@ -404,6 +399,59 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 		runSlider.setSnapToTicks(true);
 		runSlider.setPaintLabels(true);
 		panel_3.add(runSlider);
+
+		JPanel panel_15 = new JPanel();
+		panel_15.setBorder(
+				new TitledBorder(null, "BENCHMARK FILE CONFIG", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		add(panel_15);
+		panel_15.setLayout(new GridLayout(2, 1, 0, 0));
+
+		JPanel panel_16 = new JPanel();
+		panel_15.add(panel_16);
+		panel_16.setLayout(new GridLayout(0, 3, 0, 0));
+
+		JLabel lblNewLabel_1_2 = new JLabel("Max. num. of files :");
+		panel_16.add(lblNewLabel_1_2);
+
+		JLabel fileValueLabel = new JLabel("5 files");
+		panel_16.add(fileValueLabel);
+
+		JPanel panel_6_1 = new JPanel();
+		panel_16.add(panel_6_1);
+		panel_6_1.setLayout(new GridLayout(0, 2, 0, 0));
+
+		JButton decrementFiles = new JButton("<");
+		decrementFiles.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fileSlider.setValue(fileSlider.getValue() == fileSlider.getMinimum() ? fileSlider.getMinimum()
+						: (fileSlider.getValue() - 1));
+			}
+		});
+		panel_6_1.add(decrementFiles);
+
+		JButton incrementFiles = new JButton(">");
+		incrementFiles.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fileSlider.setValue(fileSlider.getValue() == fileSlider.getMaximum() ? fileSlider.getMaximum()
+						: (fileSlider.getValue() + 1));
+			}
+		});
+		panel_6_1.add(incrementFiles);
+
+		fileSlider = new JSlider();
+		fileSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				fileValueLabel.setText(fileSlider.getValue() + " files");
+				numberOfFiles = fileSlider.getValue();
+			}
+		});
+		fileSlider.setValue(0);
+		fileSlider.setSnapToTicks(true);
+		fileSlider.setPaintTicks(true);
+		fileSlider.setPaintLabels(true);
+		fileSlider.setMinorTickSpacing(1);
+		fileSlider.setMajorTickSpacing(10);
+		panel_15.add(fileSlider);
 
 		JPanel panel_3_1 = new JPanel();
 		panel_3_1.setBorder(new TitledBorder(
@@ -633,10 +681,18 @@ public class InitDialogPanel extends JPanel implements IInitDialogPanel {
 	}
 
 	/**
-	 *{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean isTimeoutEnabled() {
 		return this.timeoutEnabledRadioButton.isSelected();
+	}
+
+	/**
+	 *{@inheritDoc}
+	 */
+	@Override
+	public int getMaxNumOfFiles() {
+		return this.numberOfFiles;
 	}
 }

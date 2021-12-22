@@ -35,15 +35,15 @@ public class BarChartGui extends ApplicationFrame implements IBarChartGui {
 	/**
 	 * maximum number of bars shown in the bar chart at a time
 	 */
-	private static final int BARS_PER_PAGE = 4;
+	private static final int BARS_PER_PAGE = 6;
 	/**
 	 * space between two categories
 	 */
-	private static final double DEFAULT_CATEGORY_MARGIN = 0.2;
+	private static final double DEFAULT_CATEGORY_MARGIN = 0.25;
 	/**
 	 * space between two items
 	 */
-	private static final double DEFAULT_ITEM_MARGIN = 0.1;
+	private static final double DEFAULT_ITEM_MARGIN = 0.05;
 	/**
 	 * default font type
 	 */

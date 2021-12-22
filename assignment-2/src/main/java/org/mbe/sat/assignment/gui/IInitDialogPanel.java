@@ -85,6 +85,13 @@ public interface IInitDialogPanel {
 	public int getMaxNumOfVariables();
 
 	/**
+	 * Gets the max num of files.
+	 *
+	 * @return the max num of files
+	 */
+	public int getMaxNumOfFiles();
+	
+	/**
 	 * method returns the users choice to only consider benchmark files with an user
 	 * defined number of variables in the following
 	 * 
