@@ -74,7 +74,7 @@ public class DpllSolver implements ISolver<CnfFormula, Optional<Assignment>> {
 	 * @return an optional containing the satisfying assignment, or an empty
 	 *         optional, if the formulas is not satisfiable
 	 */
-	private Optional<Assignment> DPLLAlgorithmus(CnfFormula cnfFormula, Assignment assignment) {
+	public Optional<Assignment> DPLLAlgorithmus(CnfFormula cnfFormula, Assignment assignment) {
 		if (terminate) {
 			return Optional.empty();
 		}
