@@ -10,6 +10,8 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     
     @Override
     public Set<Assignment> sample(CnfFormula formula) {
+    	PairWiseSampler pairWiseSampler = new PairWiseSampler(formula);
+    	
         return null;
     }
 }
