@@ -331,12 +331,8 @@ public class BenchmarkRunner {
 								// runner.addSolver(i + 1 + ".2 : DP-Solver", new DpSolver());
 								break;
 							case IInitDialogPanel.DPLL_SOLVER:
-								DpllSolver oldSolver=new DpllSolver();
-								DpllSolver newSolver=new DpllSolver();
-								oldSolver.setOldVersion(true);
-								newSolver.setOldVersion(false);
-								runner.addSolver(i + 1 + ".1 / OLD  : DPLL-Solver", oldSolver);
-								runner.addSolver(i+1+".2 /  NEW  : DPLL-Solver", newSolver);
+								runner.addSolver(i + 1 + ".1 : DPLL-Solver", new DpllSolver());
+								// runner.addSolver(i+1+".2 : DPLL-Solver", new DpllSolver());
 
 //								runner.addSolver(i + 1 + ".1 /  OLD  : DPLL-Solver", new DpllSolver());
 //								runner.addSolver(i+1+".2 / NEW  : DPLL-Solver", new DpllSolver());
