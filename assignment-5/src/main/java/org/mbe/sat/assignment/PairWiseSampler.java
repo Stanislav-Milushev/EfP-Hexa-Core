@@ -10,12 +10,28 @@ import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.model.formula.Variable;
 import org.mbe.sat.impl.procedure.SolutionSimplifier;
 
+/**
+ * The Class PairWiseSampler.
+ */
 public class PairWiseSampler {
+	
+	/** The all pairs. */
 	List<Set<Variable>> allPairs = new LinkedList<Set<Variable>>();
+	
+	/** The all valid schemas. */
 	HashSet<Assignment> allValidSchemas = new HashSet<Assignment>();
+	
+	/** The formula. */
 	CnfFormula formula;
+	
+	/** The simp. */
 	SolutionSimplifier simp = new SolutionSimplifier();
 	
+	/**
+	 * Instantiates a new pair wise sampler.
+	 *
+	 * @param formula the formula
+	 */
 	public PairWiseSampler(CnfFormula formula){
 		this.formula = formula;
 		createPairs();
@@ -23,6 +39,9 @@ public class PairWiseSampler {
 	}
 	
 	
+	/**
+	 * Creates the pairs.
+	 */
 	private void createPairs() {
 		Set<Variable> allVars = this.formula.getVariables();
 		allVars.forEach(x -> {
@@ -38,12 +57,22 @@ public class PairWiseSampler {
 	}
 	
 	
+	/**
+	 * Pair exists.
+	 *
+	 * @param var1 the var 1
+	 * @param var2 the var 2
+	 * @return true, if successful
+	 */
 	private boolean pairExists(Variable var1, Variable var2) {
 		return allPairs.stream().anyMatch(x -> {
 			return x.contains(var2) && x.contains(var1);
 		});
 	}
 	
+	/**
+	 * Creates the all valid schemas.
+	 */
 	private void createAllValidSchemas(){
 		allPairs.forEach(pair -> {
 			int index = 0;
@@ -59,6 +88,13 @@ public class PairWiseSampler {
 		});
 	}
 	
+	/**
+	 * Assign pair.
+	 *
+	 * @param pair the pair
+	 * @param index the index
+	 * @return the assignment
+	 */
 	private Assignment assignPair(Set<Variable> pair, int index) {
 		Assignment ass = new Assignment();
 		Variable[] vars = pair.stream().toArray(Variable[]::new);
@@ -85,6 +121,9 @@ public class PairWiseSampler {
 		return ass;
 	}
 	
+	/**
+	 * Filter pairs.
+	 */
 	private void filterPairs(){
 		/*
 		allPairs = allPairs.stream().filter(pair -> {
