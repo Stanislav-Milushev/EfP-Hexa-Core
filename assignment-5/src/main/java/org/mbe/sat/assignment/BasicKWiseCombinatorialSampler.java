@@ -12,16 +12,16 @@ import java.util.Set;
 import org.mbe.assignment.sat.DpllSolver;
 import org.mbe.sat.api.sampler.ISampler;
 import org.mbe.sat.api.solver.ISolver;
+import org.mbe.sat.assignment.solver.BaseSolver;
 import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.model.formula.Tristate;
 import org.mbe.sat.core.model.formula.Variable;
-import org.mbe.sat.impl.BaseSolver;
 import org.mbe.sat.impl.solver.SolutionDpSolver;
 
 public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assignment> {
 
-	private SelectedSolver selectedSolver=SelectedSolver.BASE;
+	private SelectedSolver selectedSolver=SelectedSolver.DP;
 
     @Override
     public Set<Assignment> sample(CnfFormula formula) {
@@ -36,7 +36,7 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     	Assignment ass=new Assignment();
     	List<Assignment> delList=new ArrayList<>();
     	ISolver<CnfFormula,Optional<Assignment>> solver=getSelectedSolver();
-
+    	Assignment	testass= new Assignment();
     	while(!allValidSchemas.isEmpty()) {
     		//Iteration über alle Value Schemas
         	for (Iterator<Assignment> iterator = allValidSchemas.iterator(); iterator.hasNext();) {
@@ -99,13 +99,17 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     					
     					ass.setValue(key, val.booleanValue());
     				}
+    				//Elemente aus Liste löschen
+    				allValidSchemas.removeAll(delList);
     			}
     			
     			setVarMap.clear();
+    			if(testass.equals(ass)) {
+    				System.out.println("es ist gleich");
+    			}
     		}
         	
-        	//Elemente aus Liste löschen
-			allValidSchemas.removeAll(delList);
+        	
         	
         	//zweiter Fall : falls Assignment nicht komplett gefüllt aber bereits alle Value-Schemas durchgelaufen => zu Sample hinzufügen
 			sample.add(ass);
