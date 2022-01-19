@@ -17,117 +17,60 @@ import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
 import org.mbe.sat.core.model.formula.Tristate;
 import org.mbe.sat.core.model.formula.Variable;
+import org.mbe.sat.impl.procedure.SolutionSimplifier;
 import org.mbe.sat.impl.solver.SolutionDpSolver;
 
 public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assignment> {
 
-	private SelectedSolver selectedSolver=SelectedSolver.DP;
+	private SelectedSolver selectedSolver=SelectedSolver.DPLL;
 
     @Override
     public Set<Assignment> sample(CnfFormula formula) {
     	PairWiseSampler pairWiseSampler = new PairWiseSampler(formula);
     	HashSet<Assignment> allValidSchemas = pairWiseSampler.allValidSchemas;
 
-    	if(allValidSchemas==null) {
+    	if(allValidSchemas==null || allValidSchemas.isEmpty()) {
     		return new HashSet<>();
     	}
 
     	Set<Assignment> sample=new HashSet<>();
-    	Assignment ass=new Assignment();
     	List<Assignment> delList=new ArrayList<>();
     	ISolver<CnfFormula,Optional<Assignment>> solver=getSelectedSolver();
     	Assignment	testass= new Assignment();
     	Assignment newAssb = new Assignment();
     	Map<Variable,Boolean> setVarMapb=new HashMap<>();
-    	aa:while(!allValidSchemas.isEmpty()) {
-    		//Iteration über alle Value Schemas
-        	for (Iterator<Assignment> iterator = allValidSchemas.iterator(); iterator.hasNext();) {
-    			Assignment assignment = iterator.next();
-
-        		if(checkAssignmentFull(ass)) {
-        			//falls Assignment gefüllt : zu sample hinzufügen
-        			sample.add(ass);
-        			ass=new Assignment();
-        		}
-
-    			//Konfiguration mit Samples vergleichen
-    			List<Variable> values=assignment.getVariables();
-    			boolean schemaValid=true;
-    			Map<Variable,Boolean> setVarMap=new HashMap<>();
-
-    			
-    			//Value Schema mit aktuellem Assignment vergleichen
-    			for (Iterator<Variable> valIterator = values.iterator(); valIterator.hasNext();) {
-    				Variable variable = valIterator.next();
-    				
-    				//falls true : Variable kann theoretisch eingefügt werden / Abbruch sonst
-    				if(ass.getValue(variable).equals(Tristate.UNDEFINED) || ass.getValue(variable).equals(assignment.getValue(variable))) {
-    					setVarMap.put(variable, Boolean.valueOf(assignment.getValue(variable).isTrue()));
-    				}else {
-    					schemaValid=false;
-    					break;
-    				}
-
+    	Assignment ass = new Assignment();
+    	
+    	Set<Assignment> allFullAssignments = new HashSet<>();
+    	allValidSchemas.stream().forEach(pair -> {
+    		Assignment assignment = new Assignment(pair);
+    		
+    		allValidSchemas.stream().forEach(pair2 -> {
+    			List<Variable> pair2Vars = pair2.getVariables();
+    			// Wenn variablen von pair2 noch nicht im Assignment sind
+    			if(!pair2Vars.stream().anyMatch( p2var -> assignment.getVariables().contains(p2var))) {
+    				assignment.merge(pair2);
     			}
-
-    			//falls eine "unpassende Variable" in Value Schema enthalten - skip
-    			if(!schemaValid) {
-    				continue;
-    			}
-
-    			//falls alle Variablen "passend" - in Assignment einfügen
-    			Assignment newAss=new Assignment(ass);
-    			
-    			for (Map.Entry<Variable, Boolean> entry : setVarMap.entrySet()) {
-    				Variable key = entry.getKey();
-    				Boolean val = entry.getValue();
-    				
-    				newAss.setValue(key, val.booleanValue());
-    			}	
-
-    			//Validität prüfen / SAT
-    			CnfFormula simpForm = pairWiseSampler.simp.simplify(pairWiseSampler.formula, newAss);
-    			Optional<Assignment> solve = solver.solve(simpForm);
-    			
-    			if(solve.equals(Optional.empty())) {
-    				continue;
-    			}else {
-    				//falls Value Schema valide : im nächste Schritt in eigentliches Assignment einfügen & aus Value Schemas löschen
-    				newAssb = new Assignment(assignment);
-    				setVarMapb =new HashMap<>(setVarMap);
-    				break aa;
-    				
-    				//Elemente aus Liste löschen
-    				
-    				}
-    				
-    				
-    			}
-    			
-    			
-    		}
-    			delList.add(newAssb);
-    				
-    				for (Map.Entry<Variable, Boolean> entry : setVarMapb.entrySet()) {
-    					Variable key = entry.getKey();
-    					Boolean val = entry.getValue();
-    					
-    					ass.setValue(key, val.booleanValue());
-    					allValidSchemas.removeAll(delList);
-        	
-        	
-        	//zweiter Fall : falls Assignment nicht komplett gefüllt aber bereits alle Value-Schemas durchgelaufen => zu Sample hinzufügen
-			;
-
-    	}
-    	sample.add(ass);
-        return sample;
+    		});
+    		
+			SolutionSimplifier simp = new SolutionSimplifier();
+			CnfFormula form = simp.simplify(formula, assignment);
+			Optional<Assignment> solution = getSelectedSolver().solve(form);
+			
+			if(solution.isPresent()) {
+    			allFullAssignments.add(assignment);
+			}
+    		
+        });
+    	
+    	
+    	return allFullAssignments;
     }
 
     private boolean checkAssignmentFull(Assignment ass) {
 		List<Variable> vars=ass.getVariables();
 		
-		//prüfen, ob noch UNDEFINED Variablen vorliegen (falls nicht : counter=0)
+		//prï¿½fen, ob noch UNDEFINED Variablen vorliegen (falls nicht : counter=0)
 		for (Iterator<Variable> varIterator = vars.iterator(); varIterator.hasNext();) {
 			Variable variable = (Variable) varIterator.next();
 			if(ass.getValue(variable).equals(Tristate.UNDEFINED)) {
