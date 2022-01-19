@@ -37,7 +37,9 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     	List<Assignment> delList=new ArrayList<>();
     	ISolver<CnfFormula,Optional<Assignment>> solver=getSelectedSolver();
     	Assignment	testass= new Assignment();
-    	while(!allValidSchemas.isEmpty()) {
+    	Assignment newAssb = new Assignment();
+    	Map<Variable,Boolean> setVarMapb=new HashMap<>();
+    	aa:while(!allValidSchemas.isEmpty()) {
     		//Iteration über alle Value Schemas
         	for (Iterator<Assignment> iterator = allValidSchemas.iterator(); iterator.hasNext();) {
     			Assignment assignment = iterator.next();
@@ -91,31 +93,34 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     				continue;
     			}else {
     				//falls Value Schema valide : im nächste Schritt in eigentliches Assignment einfügen & aus Value Schemas löschen
-    				delList.add(assignment);
+    				newAssb = new Assignment(assignment);
+    				setVarMapb =new HashMap<>(setVarMap);
+    				break aa;
     				
-    				for (Map.Entry<Variable, Boolean> entry : setVarMap.entrySet()) {
+    				//Elemente aus Liste löschen
+    				
+    				}
+    				
+    				
+    			}
+    			
+    			
+    		}
+    			delList.add(newAssb);
+    				
+    				for (Map.Entry<Variable, Boolean> entry : setVarMapb.entrySet()) {
     					Variable key = entry.getKey();
     					Boolean val = entry.getValue();
     					
     					ass.setValue(key, val.booleanValue());
-    				}
-    				//Elemente aus Liste löschen
-    				allValidSchemas.removeAll(delList);
-    			}
-    			
-    			setVarMap.clear();
-    			if(testass.equals(ass)) {
-    				System.out.println("es ist gleich");
-    			}
-    		}
-        	
+    					allValidSchemas.removeAll(delList);
         	
         	
         	//zweiter Fall : falls Assignment nicht komplett gefüllt aber bereits alle Value-Schemas durchgelaufen => zu Sample hinzufügen
-			sample.add(ass);
+			;
 
     	}
-    	
+    	sample.add(ass);
         return sample;
     }
 
