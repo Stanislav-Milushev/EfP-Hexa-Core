@@ -1,11 +1,8 @@
 package org.mbe.sat.assignment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,16 +29,9 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     	if(allValidSchemas==null || allValidSchemas.isEmpty()) {
     		return new HashSet<>();
     	}
-
-    	Set<Assignment> sample=new HashSet<>();
-    	List<Assignment> delList=new ArrayList<>();
-    	ISolver<CnfFormula,Optional<Assignment>> solver=getSelectedSolver();
-    	Assignment	testass= new Assignment();
-    	Assignment newAssb = new Assignment();
-    	Map<Variable,Boolean> setVarMapb=new HashMap<>();
-    	Assignment ass = new Assignment();
     	
     	Set<Assignment> allFullAssignments = new HashSet<>();
+    	
     	allValidSchemas.stream().forEach(pair -> {
     		Assignment assignment = new Assignment(pair);
     		
@@ -60,25 +50,11 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
 			if(solution.isPresent()) {
     			allFullAssignments.add(assignment);
 			}
-    		
         });
     	
     	
     	return allFullAssignments;
     }
-
-    private boolean checkAssignmentFull(Assignment ass) {
-		List<Variable> vars=ass.getVariables();
-		
-		//pr�fen, ob noch UNDEFINED Variablen vorliegen (falls nicht : counter=0)
-		for (Iterator<Variable> varIterator = vars.iterator(); varIterator.hasNext();) {
-			Variable variable = (Variable) varIterator.next();
-			if(ass.getValue(variable).equals(Tristate.UNDEFINED)) {
-				return false;
-			}
-		}
-		return true;
-	}
 
 	private ISolver<CnfFormula, Optional<Assignment>> getSelectedSolver() {
 		ISolver<CnfFormula,Optional<Assignment>> solver=null;
@@ -97,18 +73,6 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
 			break;
 		}
     	return solver;
-	}
-
-	private boolean assignmentFilled(Assignment assignment) {
-		List<Variable> variables = assignment.getVariables();
-
-		for (Iterator<Variable> iterator = variables.iterator(); iterator.hasNext();) {
-			Variable variable = iterator.next();
-			if(assignment.getValue(variable).equals(Tristate.UNDEFINED)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public void selectSolver(SelectedSolver selectedSolver) {
