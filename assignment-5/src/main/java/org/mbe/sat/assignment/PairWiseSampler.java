@@ -71,7 +71,7 @@ public class PairWiseSampler {
 	}
 	
 	/**
-	 * Creates the all valid schemas.
+	 * Creates the all valid schemas. (valid pairs)
 	 */
 	private void createAllValidSchemas(){
 		allPairs.forEach(pair -> {
@@ -119,28 +119,6 @@ public class PairWiseSampler {
 		}
 		
 		return ass;
-	}
-	
-	/**
-	 * Filter pairs.
-	 */
-	private void filterPairs(){
-		/*
-		allPairs = allPairs.stream().filter(pair -> {
-			boolean checkTRUETRUE = false, checkTRUEFALSE = false, checkFALSETRUE = false, checkFALSEFALSE = false;
-			Assignment ass = new Assignment();
-			pair.forEach(variable -> {
-				ass.setValue(variable, true);				
-			});
-			
-			// TRUE TRUE
-			SolutionSimplifier simp = new SolutionSimplifier();
-			CnfFormula simplifiedFormula = simp.simplify(formula, ass);
-			checkTRUETRUE = simplifiedFormula.getClauses().stream().anyMatch(clause -> clause.getLiterals().isEmpty());
-			
-						
-			return checkTRUETRUE && checkTRUEFALSE && checkFALSETRUE && checkFALSEFALSE;
-		}).toList();*/
 	}
 	
 }

@@ -1,7 +1,6 @@
 package org.mbe.sat.assignment;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,43 +11,51 @@ import org.mbe.sat.api.solver.ISolver;
 import org.mbe.sat.assignment.solver.BaseSolver;
 import org.mbe.sat.core.model.Assignment;
 import org.mbe.sat.core.model.formula.CnfFormula;
-import org.mbe.sat.core.model.formula.Tristate;
 import org.mbe.sat.core.model.formula.Variable;
 import org.mbe.sat.impl.procedure.SolutionSimplifier;
 import org.mbe.sat.impl.solver.SolutionDpSolver;
 
 public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assignment> {
 
+	/**
+	 * Der Solver, der für das Verfahren verwendet werden soll.
+	 */
 	private SelectedSolver selectedSolver=SelectedSolver.DPLL;
 
     @Override
     public Set<Assignment> sample(CnfFormula formula) {
-    	PairWiseSampler pairWiseSampler = new PairWiseSampler(formula);
+    	// wir klonen die formula um die eigentliche Formula durch Simplify-Prozesse nicht zu veraendern
+    	CnfFormula cnfFormula = new CnfFormula(formula);
+    	
+    	PairWiseSampler pairWiseSampler = new PairWiseSampler(cnfFormula);
     	HashSet<Assignment> allValidSchemas = pairWiseSampler.allValidSchemas;
 
+    	// Checken ob Paare vorhanden sind
     	if(allValidSchemas==null || allValidSchemas.isEmpty()) {
     		return new HashSet<>();
     	}
     	
-    	Set<Assignment> allFullAssignments = new HashSet<>();
+    	Set<Assignment> allFullAssignments = new HashSet<>(); // die rueckgabe-liste
     	
-    	allValidSchemas.stream().forEach(pair -> {
-    		Assignment assignment = new Assignment(pair);
+    	allValidSchemas.stream().forEach(pair -> { // fuer jedes valide Paar...
+    		Assignment assignment = new Assignment(pair); // Neues Assignment erstellen mit dem Paar initialisiert
+    		CnfFormula clonedFormula = new CnfFormula(formula); // Klonen der Formula
     		
-    		allValidSchemas.stream().forEach(pair2 -> {
+    		allValidSchemas.stream().forEach(pair2 -> { // durch alle validen Paare gehen...
     			List<Variable> pair2Vars = pair2.getVariables();
-    			// Wenn variablen von pair2 noch nicht im Assignment sind
+    			// Wenn variablen von pair2 noch nicht im Assignment vorhanden sind sind...
     			if(!pair2Vars.stream().anyMatch( p2var -> assignment.getVariables().contains(p2var))) {
-    				assignment.merge(pair2);
+    				assignment.merge(pair2); // Dem assignment das Paar hinzufuegen
     			}
     		});
     		
+    		// Formula mit dem momentanen Assignment simplifyen und solven
 			SolutionSimplifier simp = new SolutionSimplifier();
-			CnfFormula form = simp.simplify(formula, assignment);
+			CnfFormula form = simp.simplify(clonedFormula, assignment);
 			Optional<Assignment> solution = getSelectedSolver().solve(form);
 			
-			if(solution.isPresent()) {
-    			allFullAssignments.add(assignment);
+			if(solution.isPresent()) { // falls die forumla mit dem momentanen assignment solvable ist
+    			allFullAssignments.add(assignment); // zu der rueckgabe-liste adden
 			}
         });
     	
@@ -56,6 +63,10 @@ public class BasicKWiseCombinatorialSampler implements ISampler<CnfFormula, Assi
     	return allFullAssignments;
     }
 
+    /**
+     * Gets an Solver Object of the selected Solver
+     * @return Instance of ISovler Object
+     */
 	private ISolver<CnfFormula, Optional<Assignment>> getSelectedSolver() {
 		ISolver<CnfFormula,Optional<Assignment>> solver=null;
 
