@@ -1,0 +1,14 @@
+rootProject.name = 'assignment-6'
+
+// Add reference to old exercises
+include ':assignment-2'
+project(':assignment-2').projectDir = new File("../../A2/code")
+
+include ':assignment-3'
+project(':assignment-3').projectDir = new File("../../A3/code")
+
+include ':assignment-4'
+project(':assignment-4').projectDir = new File("../../A4/code")
+
+include ':assignment-5'
+project(':assignment-5').projectDir = new File("../../A5/code")
